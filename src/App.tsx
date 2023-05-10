@@ -1,25 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+// import logo from "./logo.svg";
+
+import AppContainer from "./AppContainer";
+import Header from "./Header";
+import React from "react";
 
 function App() {
+  const formFields = [
+    { id: 1, label: "First Name" },
+    { id: 2, label: "Last Name" },
+    { id: 3, label: "Email" },
+  ];
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AppContainer>
+      <div className=" p-4 mx-auto bg-white shadow-lg rounded-xl">
+        <Header title="Welcome to #react-with-typescript and tailwind" />
+        {formFields.map((fields) => {
+          return (
+            <React.Fragment key={fields.id}>
+              <label className="" htmlFor="">
+                {fields.label}
+              </label>
+              <input
+                className="border border-gray-200 rounded-lg p-2 m-2 w-full"
+                type="text"
+              />
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </AppContainer>
   );
 }
 
