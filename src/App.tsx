@@ -1,6 +1,6 @@
 // import logo from "./logo.svg";
 
-import AppContainer from "./AppContainer";
+import AppContainer from "../src/hoc/AppContainer";
 import Header from "./Header";
 import React from "react";
 
