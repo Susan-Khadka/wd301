@@ -9,14 +9,6 @@ import Form from "./components/Form";
 function App() {
   const [state, setState] = useState("HOME");
 
-  const formFields = [
-    { id: 1, label: "First Name", type: "text" },
-    { id: 2, label: "Last Name", type: "text" },
-    { id: 3, label: "Email", type: "email" },
-    { id: 4, label: "Date of Birth", type: "date" },
-    { id: 5, label: "Contact No", type: "tel" },
-  ];
-
   const openForm = () => {
     setState("FORM");
   };
@@ -32,7 +24,7 @@ function App() {
         {state === "HOME" ? (
           <Home openForm={openForm} />
         ) : (
-          <Form closeForm={closeForm} formFields={formFields} />
+          <Form closeForm={closeForm} />
         )}
       </div>
     </AppContainer>

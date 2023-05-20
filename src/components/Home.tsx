@@ -3,14 +3,13 @@ import logo from "../logo.svg";
 
 function Home(props: { openForm: () => void }) {
 
-
-  const formFields = [
-    { id: 1, label: "First Name", type: "text" },
-    { id: 2, label: "Last Name", type: "text" },
-    { id: 3, label: "Email", type: "email" },
-    { id: 4, label: "Date of Birth", type: "date" },
-    { id: 5, label: "Contact No", type: "tel" },
-  ];
+  // const formFields = [
+  //   { id: 1, label: "First Name", type: "text" },
+  //   { id: 2, label: "Last Name", type: "text" },
+  //   { id: 3, label: "Email", type: "email" },
+  //   { id: 4, label: "Date of Birth", type: "date" },
+  //   { id: 5, label: "Contact No", type: "tel" },
+  // ];
   return (
     <>
       <div className="flex mt-5">
