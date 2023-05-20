@@ -1,13 +1,16 @@
 import React, { FormEvent, useState } from "react";
 import Formfield from "./Formfield";
 
+// TODO: Change callback implementtation
+// TODO: Add clear button to clear form values
+
 function Form(props: { closeForm: () => void }) {
   const formFields = [
-    { id: 1, label: "First Name", type: "text" },
-    { id: 2, label: "Last Name", type: "text" },
-    { id: 3, label: "Email", type: "email" },
-    { id: 4, label: "Date of Birth", type: "date" },
-    { id: 5, label: "Contact No", type: "tel" },
+    { id: 1, label: "First Name", type: "text", value: "" },
+    { id: 2, label: "Last Name", type: "text", value: ""  },
+    { id: 3, label: "Email", type: "email", value: ""  },
+    { id: 4, label: "Date of Birth", type: "date", value: ""  },
+    { id: 5, label: "Contact No", type: "tel", value: ""  },
   ];
 
   const [fields, setFields] = useState([...formFields]);
@@ -26,6 +29,7 @@ function Form(props: { closeForm: () => void }) {
         id: Number(new Date()),
         label: newField,
         type: fieldType,
+        value: "",
       },
     ]);
     setNewField("");
@@ -48,6 +52,7 @@ function Form(props: { closeForm: () => void }) {
                 id={fields.id}
                 labelText={fields.label}
                 type={fields.type}
+                value={fields.value}
               />
             );
           })}
