@@ -1,5 +1,4 @@
 import React, { FormEvent, useState } from "react";
-import LabelledInput from "./LabelledInput";
 import Formfield from "./Formfield";
 
 function Form(props: { closeForm: () => void }) {
@@ -18,7 +17,8 @@ function Form(props: { closeForm: () => void }) {
     console.log("Form Submitted");
   };
 
-  const addField = () => {
+  const addField = (event: FormEvent) => {
+    event.preventDefault();
     setFields([
       ...fields,
       {
@@ -35,37 +35,20 @@ function Form(props: { closeForm: () => void }) {
 
   return (
     <>
-      <form
-        className="px-2 mt-4"
-        onSubmit={(event) => {
-          handleSubmit(event);
-        }}
-      >
+      <form className="px-2 mt-4">
         {fields.map((fields) => {
           return (
-            <Formfield removeFieldCB={removeField} id={fields.id}  labelText={fields.label}  type={fields.type}  />
-            // <React.Fragment key={fields.id}>
-            //   <label className="" htmlFor="">
-            //     {fields.label}
-            //   </label>
-            //   <div className="flex gap-2 items-baseline">
-            //     <input
-            //       className="border border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
-            //       type={fields.type}
-            //     />
-            //     <button
-            //       onClick={() => removeField(fields.id)}
-            //       className="px-2 py-2 border rounded-md"
-            //     >
-            //       Delete
-            //     </button>
-            //   </div>
-            // </React.Fragment>
+            <Formfield
+              removeFieldCB={removeField}
+              id={fields.id}
+              labelText={fields.label}
+              type={fields.type}
+            />
           );
         })}
         <div className="flex gap-x-4">
           <button
-            type="submit"
+            onClick={(event)=>{handleSubmit(event)}}
             className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
           >
             Submit
@@ -78,7 +61,7 @@ function Form(props: { closeForm: () => void }) {
           </button>
           <button
             className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
-            onClick={addField}
+            onClick={(event) => addField(event)}
           >
             Add Field
           </button>

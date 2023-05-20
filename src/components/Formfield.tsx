@@ -1,10 +1,10 @@
 import React from "react";
 
-function Formfield(props : {
-    type: string,
-    id: number,
-    labelText: string,
-    removeFieldCB: any
+function Formfield(props: {
+  type: string;
+  id: number;
+  labelText: string;
+  removeFieldCB: (id: number) => void;
 }) {
   return (
     <React.Fragment key={props.id}>
