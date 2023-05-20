@@ -7,7 +7,7 @@ function Formfield(props: {
   removeFieldCB: (id: number) => void;
 }) {
   return (
-    <React.Fragment key={props.id}>
+    <React.Fragment>
       <label className="" htmlFor="">
         {props.labelText}
       </label>

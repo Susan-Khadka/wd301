@@ -19,7 +19,6 @@ function Form(props: { closeForm: () => void }) {
   };
 
   const addField = (event: FormEvent) => {
-    event.preventDefault();
     setFields([
       ...fields,
       {
@@ -28,6 +27,7 @@ function Form(props: { closeForm: () => void }) {
         type: "text",
       },
     ]);
+    setNewField("");
   };
 
   const removeField = (id: number) => {
@@ -41,6 +41,7 @@ function Form(props: { closeForm: () => void }) {
           {fields.map((fields) => {
             return (
               <Formfield
+                key={fields.id}
                 removeFieldCB={removeField}
                 id={fields.id}
                 labelText={fields.label}
@@ -52,6 +53,7 @@ function Form(props: { closeForm: () => void }) {
       </div>
       <div className="flex gap-2 items-baseline px-2">
         <input
+          value={newField}
           onChange={(event) => setNewField(event.target.value)}
           className="border border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
           type="text"
