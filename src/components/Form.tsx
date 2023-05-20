@@ -1,5 +1,6 @@
 import React, { FormEvent, useState } from "react";
 import LabelledInput from "./LabelledInput";
+import Formfield from "./Formfield";
 
 function Form(props: { closeForm: () => void }) {
   const formFields = [
@@ -28,7 +29,7 @@ function Form(props: { closeForm: () => void }) {
     ]);
   };
 
-  const removeField: any = (id: number) => {
+  const removeField = (id: number) => {
     setFields(fields.filter((field) => field.id !== id));
   };
 
@@ -42,18 +43,24 @@ function Form(props: { closeForm: () => void }) {
       >
         {fields.map((fields) => {
           return (
-            <React.Fragment key={fields.id}>
-              <label className="" htmlFor="">
-                {fields.label}
-              </label>
-              <div className="flex gap-2 items-baseline">
-                <input
-                  className="border border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
-                  type={fields.type}
-                />
-                
-              </div>
-            </React.Fragment>
+            <Formfield removeFieldCB={removeField} id={fields.id}  labelText={fields.label}  type={fields.type}  />
+            // <React.Fragment key={fields.id}>
+            //   <label className="" htmlFor="">
+            //     {fields.label}
+            //   </label>
+            //   <div className="flex gap-2 items-baseline">
+            //     <input
+            //       className="border border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
+            //       type={fields.type}
+            //     />
+            //     <button
+            //       onClick={() => removeField(fields.id)}
+            //       className="px-2 py-2 border rounded-md"
+            //     >
+            //       Delete
+            //     </button>
+            //   </div>
+            // </React.Fragment>
           );
         })}
         <div className="flex gap-x-4">
