@@ -13,6 +13,7 @@ function Form(props: { closeForm: () => void }) {
   const [fields, setFields] = useState([...formFields]);
 
   const [newField, setNewField] = useState("");
+  const [fieldType, setFieldType] = useState("text");
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     console.log("Form Submitted");
@@ -24,10 +25,11 @@ function Form(props: { closeForm: () => void }) {
       {
         id: Number(new Date()),
         label: newField,
-        type: "text",
+        type: fieldType,
       },
     ]);
     setNewField("");
+    setFieldType("text");
   };
 
   const removeField = (id: number) => {
@@ -51,16 +53,49 @@ function Form(props: { closeForm: () => void }) {
           })}
         </form>
       </div>
-      <div className="flex gap-2 items-baseline px-2">
+      <div className="flex-col gap-2 items-baseline px-2">
         <input
           value={newField}
           onChange={(event) => setNewField(event.target.value)}
-          className="border border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
+          className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
           type="text"
         />
-        <button onClick={addField} className="px-2 py-2 border rounded-md">
-          Add Field
-        </button>
+        <div className="flex gap-2 mb-2">
+          <select
+            value={fieldType}
+            onChange={(event) => setFieldType(event.target.value)}
+            className="p-2 border rounded-md w-11/12"
+            name="type"
+            id="type"
+          >
+            <option value="text">Text</option>
+            <option value="email">Email</option>
+            <option value="date">Date</option>
+            <option value="tel">Phone</option>
+            <option value="number">Number</option>
+            <option value="password">Password</option>
+            <option value="textarea">Textarea</option>
+          </select>
+          <button
+            onClick={addField}
+            className="px-2 py-2 border flex justify-center rounded-md flex-1 bg-blue-500 text-white"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
       <div className="flex gap-x-4">
         <button
