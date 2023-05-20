@@ -12,6 +12,7 @@ function Form(props: { closeForm: () => void }) {
 
   const [fields, setFields] = useState([...formFields]);
 
+  const [newField, setNewField] = useState("");
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     console.log("Form Submitted");
@@ -23,7 +24,7 @@ function Form(props: { closeForm: () => void }) {
       ...fields,
       {
         id: Number(new Date()),
-        label: "Address",
+        label: newField,
         type: "text",
       },
     ]);
@@ -34,40 +35,48 @@ function Form(props: { closeForm: () => void }) {
   };
 
   return (
-    <>
-      <form className="px-2 mt-4">
-        {fields.map((fields) => {
-          return (
-            <Formfield
-              removeFieldCB={removeField}
-              id={fields.id}
-              labelText={fields.label}
-              type={fields.type}
-            />
-          );
-        })}
-        <div className="flex gap-x-4">
-          <button
-            onClick={(event)=>{handleSubmit(event)}}
-            className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
-          >
-            Submit
-          </button>
-          <button
-            className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
-            onClick={props.closeForm}
-          >
-            Close Form
-          </button>
-          <button
-            className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
-            onClick={(event) => addField(event)}
-          >
-            Add Field
-          </button>
-        </div>
-      </form>
-    </>
+    <div className="divide-y divide-dotted">
+      <div>
+        <form className="px-2 mt-4">
+          {fields.map((fields) => {
+            return (
+              <Formfield
+                removeFieldCB={removeField}
+                id={fields.id}
+                labelText={fields.label}
+                type={fields.type}
+              />
+            );
+          })}
+        </form>
+      </div>
+      <div className="flex gap-2 items-baseline px-2">
+        <input
+          onChange={(event) => setNewField(event.target.value)}
+          className="border border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
+          type="text"
+        />
+        <button onClick={addField} className="px-2 py-2 border rounded-md">
+          Add Field
+        </button>
+      </div>
+      <div className="flex gap-x-4">
+        <button
+          onClick={(event) => {
+            handleSubmit(event);
+          }}
+          className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
+        >
+          Submit
+        </button>
+        <button
+          className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
+          onClick={props.closeForm}
+        >
+          Close Form
+        </button>
+      </div>
+    </div>
   );
 }
 
