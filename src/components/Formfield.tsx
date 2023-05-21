@@ -6,6 +6,7 @@ function Formfield(props: {
   labelText: string;
   removeFieldCB: (id: number) => void;
   value: string;
+  onChangeCB: (id: number, value: string) => void;
 }) {
   return (
     <React.Fragment>
@@ -14,6 +15,9 @@ function Formfield(props: {
       </label>
       <div className="flex gap-2 items-baseline">
         <input
+          onChange={(event) => {
+            props.onChangeCB(props.id, event.target.value);
+          }}
           value={props.value}
           className="border border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
           type={props.type}

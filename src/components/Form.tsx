@@ -1,25 +1,45 @@
 import React, { FormEvent, useState } from "react";
 import Formfield from "./Formfield";
 
-// TODO: Change callback implementtation
-// TODO: Add clear button to clear form values
-
 function Form(props: { closeForm: () => void }) {
   const formFields = [
     { id: 1, label: "First Name", type: "text", value: "" },
-    { id: 2, label: "Last Name", type: "text", value: ""  },
-    { id: 3, label: "Email", type: "email", value: ""  },
-    { id: 4, label: "Date of Birth", type: "date", value: ""  },
-    { id: 5, label: "Contact No", type: "tel", value: ""  },
+    { id: 2, label: "Last Name", type: "text", value: "" },
+    { id: 3, label: "Email", type: "email", value: "" },
+    { id: 4, label: "Date of Birth", type: "date", value: "" },
+    { id: 5, label: "Contact No", type: "tel", value: "" },
   ];
 
   const [fields, setFields] = useState([...formFields]);
 
   const [newField, setNewField] = useState("");
   const [fieldType, setFieldType] = useState("text");
+
+  const onChangeCB = (id: number, value: string) => {
+    setFields(
+      fields.map((field) => {
+        if (field.id === id) {
+          return {
+            ...field,
+            value,
+          };
+        }
+        return field;
+      })
+    );
+  };
+
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     console.log("Form Submitted");
+  };
+
+  const clearFields = (event: FormEvent) => {
+    setFields(
+      fields.map((field) => {
+        return { ...field, value: "" };
+      })
+    );
   };
 
   const addField = (event: FormEvent) => {
@@ -47,6 +67,7 @@ function Form(props: { closeForm: () => void }) {
           {fields.map((fields) => {
             return (
               <Formfield
+                onChangeCB={onChangeCB}
                 key={fields.id}
                 removeFieldCB={removeField}
                 id={fields.id}
@@ -110,6 +131,14 @@ function Form(props: { closeForm: () => void }) {
           className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
         >
           Submit
+        </button>
+        <button
+          onClick={(event) => {
+            clearFields(event);
+          }}
+          className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
+        >
+          Clear
         </button>
         <button
           className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
