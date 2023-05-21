@@ -1,23 +1,42 @@
 import React, { FormEvent, useState } from "react";
 import Formfield from "./Formfield";
 
-function Form(props: { closeForm: () => void }) {
-  const formFields = [
-    { id: 1, label: "First Name", type: "text", value: "" },
-    { id: 2, label: "Last Name", type: "text", value: "" },
-    { id: 3, label: "Email", type: "email", value: "" },
-    { id: 4, label: "Date of Birth", type: "date", value: "" },
-    { id: 5, label: "Contact No", type: "tel", value: "" },
-  ];
+interface FormField {
+  id: number;
+  label: string;
+  type: string;
+  value: string;
+}
 
-  const [fields, setFields] = useState([...formFields]);
+const initialFormFields: FormField[] = [
+  { id: 1, label: "First Name", type: "text", value: "" },
+  { id: 2, label: "Last Name", type: "text", value: "" },
+  { id: 3, label: "Email", type: "email", value: "" },
+  { id: 4, label: "Date of Birth", type: "date", value: "" },
+  { id: 5, label: "Contact No", type: "tel", value: "" },
+];
+
+const initialState = () => {
+  const formFieldJSON = localStorage.getItem("formData");
+  const persistedFormData = formFieldJSON
+    ? JSON.parse(formFieldJSON)
+    : initialFormFields;
+  return persistedFormData;
+};
+
+function Form(props: { closeForm: () => void }) {
+  const [fields, setFields] = useState(initialState);
 
   const [newField, setNewField] = useState("");
   const [fieldType, setFieldType] = useState("text");
 
+  const saveFormData = (currentData: FormField[]) => {
+    localStorage.setItem("formData", JSON.stringify(currentData));
+  };
+
   const onChangeCB = (id: number, value: string) => {
     setFields(
-      fields.map((field) => {
+      fields.map((field: FormField) => {
         if (field.id === id) {
           return {
             ...field,
@@ -29,14 +48,9 @@ function Form(props: { closeForm: () => void }) {
     );
   };
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    console.log("Form Submitted");
-  };
-
   const clearFields = (event: FormEvent) => {
     setFields(
-      fields.map((field) => {
+      fields.map((field: FormField) => {
         return { ...field, value: "" };
       })
     );
@@ -57,14 +71,14 @@ function Form(props: { closeForm: () => void }) {
   };
 
   const removeField = (id: number) => {
-    setFields(fields.filter((field) => field.id !== id));
+    setFields(fields.filter((field: FormField) => field.id !== id));
   };
 
   return (
     <div className="divide-y divide-dotted">
       <div>
         <form className="px-2 mt-4">
-          {fields.map((fields) => {
+          {fields.map((fields: FormField) => {
             return (
               <Formfield
                 onChangeCB={onChangeCB}
@@ -126,11 +140,11 @@ function Form(props: { closeForm: () => void }) {
       <div className="flex gap-x-4">
         <button
           onClick={(event) => {
-            handleSubmit(event);
+            saveFormData(fields);
           }}
           className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
         >
-          Submit
+          Save
         </button>
         <button
           onClick={(event) => {
