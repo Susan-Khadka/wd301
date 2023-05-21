@@ -1,5 +1,10 @@
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Formfield from "./Formfield";
+
+interface formData {
+  title: string;
+  formFields: FormField[];
+}
 
 interface FormField {
   id: number;
@@ -16,15 +21,18 @@ const initialFormFields: FormField[] = [
   { id: 5, label: "Contact No", type: "tel", value: "" },
 ];
 
-const saveFormData = (currentData: FormField[]) => {
+const saveFormData = (currentData: formData) => {
   localStorage.setItem("formData", JSON.stringify(currentData));
 };
 
-const initialState = () => {
+const initialState: () => formData = () => {
   const formFieldJSON = localStorage.getItem("formData");
   const persistedFormData = formFieldJSON
     ? JSON.parse(formFieldJSON)
-    : initialFormFields;
+    : {
+        title: "Untitled Form",
+        formFields: initialFormFields,
+      };
   return persistedFormData;
 };
 
@@ -33,11 +41,12 @@ function Form(props: { closeForm: () => void }) {
 
   const [newField, setNewField] = useState("");
   const [fieldType, setFieldType] = useState("text");
+  const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const oldTitle = document.title;
     document.title = "Form App";
-
+    titleRef.current?.focus();
     return () => {
       document.title = oldTitle;
     };
@@ -55,8 +64,9 @@ function Form(props: { closeForm: () => void }) {
   }, [fields]);
 
   const onChangeCB = (id: number, value: string) => {
-    setFields(
-      fields.map((field: FormField) => {
+    setFields({
+      ...fields,
+      formFields: fields.formFields.map((field: FormField) => {
         if (field.id === id) {
           return {
             ...field,
@@ -64,41 +74,62 @@ function Form(props: { closeForm: () => void }) {
           };
         }
         return field;
-      })
-    );
+      }),
+    });
   };
 
   const clearFields = (event: FormEvent) => {
-    setFields(
-      fields.map((field: FormField) => {
+    setFields({
+      ...fields,
+      formFields: fields.formFields.map((field: FormField) => {
         return { ...field, value: "" };
-      })
-    );
+      }),
+    });
   };
 
   const addField = (event: FormEvent) => {
-    setFields([
+    setFields({
       ...fields,
-      {
-        id: Number(new Date()),
-        label: newField,
-        type: fieldType,
-        value: "",
-      },
-    ]);
+      formFields: [
+        ...fields.formFields,
+        {
+          id: Number(new Date()),
+          label: newField,
+          type: fieldType,
+          value: "",
+        },
+      ],
+    });
     setNewField("");
     setFieldType("text");
   };
 
   const removeField = (id: number) => {
-    setFields(fields.filter((field: FormField) => field.id !== id));
+    setFields({
+      ...fields,
+      formFields: fields.formFields.filter(
+        (field: FormField) => field.id !== id
+      ),
+    });
   };
 
   return (
     <div className="divide-y divide-dotted">
-      <div>
+      <input
+        value={fields.title}
+        onChange={(event) =>
+          setFields({
+            ...fields,
+            title: event.target.value,
+          })
+        }
+        className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
+        type="text"
+        ref={titleRef}
+      />
+      <div className="">
         <form className="px-2 mt-4">
-          {fields.map((fields: FormField) => {
+          {fields.formFields.map((fields: FormField) => {
             return (
               <Formfield
                 onChangeCB={onChangeCB}
