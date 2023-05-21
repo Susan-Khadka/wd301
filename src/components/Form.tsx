@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import Formfield from "./Formfield";
 
 interface FormField {
@@ -33,6 +33,26 @@ function Form(props: { closeForm: () => void }) {
 
   const [newField, setNewField] = useState("");
   const [fieldType, setFieldType] = useState("text");
+
+  useEffect(() => {
+    const oldTitle = document.title;
+    document.title = "Form App";
+
+    return () => {
+      document.title = oldTitle;
+    };
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      saveFormData(fields);
+      console.log("Saving data");
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [fields]);
 
   const onChangeCB = (id: number, value: string) => {
     setFields(
