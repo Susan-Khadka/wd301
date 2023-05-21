@@ -16,6 +16,10 @@ const initialFormFields: FormField[] = [
   { id: 5, label: "Contact No", type: "tel", value: "" },
 ];
 
+const saveFormData = (currentData: FormField[]) => {
+  localStorage.setItem("formData", JSON.stringify(currentData));
+};
+
 const initialState = () => {
   const formFieldJSON = localStorage.getItem("formData");
   const persistedFormData = formFieldJSON
@@ -29,10 +33,6 @@ function Form(props: { closeForm: () => void }) {
 
   const [newField, setNewField] = useState("");
   const [fieldType, setFieldType] = useState("text");
-
-  const saveFormData = (currentData: FormField[]) => {
-    localStorage.setItem("formData", JSON.stringify(currentData));
-  };
 
   const onChangeCB = (id: number, value: string) => {
     setFields(
