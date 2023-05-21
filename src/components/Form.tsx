@@ -2,6 +2,7 @@ import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Formfield from "./Formfield";
 
 interface formData {
+  id: number;
   title: string;
   formFields: FormField[];
 }
@@ -21,23 +22,40 @@ const initialFormFields: FormField[] = [
   { id: 5, label: "Contact No", type: "tel", value: "" },
 ];
 
-const saveFormData = (currentData: formData) => {
-  localStorage.setItem("formData", JSON.stringify(currentData));
+const getLocalForms: () => formData[] = () => {
+  const savedFormData = localStorage.getItem("savedForms");
+  return savedFormData ? JSON.parse(savedFormData) : [];
 };
 
 const initialState: () => formData = () => {
-  const formFieldJSON = localStorage.getItem("formData");
-  const persistedFormData = formFieldJSON
-    ? JSON.parse(formFieldJSON)
-    : {
-        title: "Untitled Form",
-        formFields: initialFormFields,
-      };
-  return persistedFormData;
+  const localForms = getLocalForms();
+  if (localForms.length > 0) {
+    return localForms[0];
+  }
+  const newForm = {
+    id: Number(new Date()),
+    title: "Untitled Form",
+    formFields: initialFormFields,
+  };
+
+  saveLocalForms([...localForms, newForm]);
+  return newForm;
+};
+
+const saveLocalForms = (localForms: formData[]) => {
+  localStorage.setItem("savedForms", JSON.stringify(localForms));
+};
+
+const saveFormData = (currentData: formData) => {
+  const localForms = getLocalForms();
+  const updatedLocalForms = localForms.map((form: formData) =>
+    form.id === currentData.id ? currentData : form
+  );
+  saveLocalForms(updatedLocalForms);
 };
 
 function Form(props: { closeForm: () => void }) {
-  const [fields, setFields] = useState(initialState);
+  const [fields, setFields] = useState(() => initialState());
 
   const [newField, setNewField] = useState("");
   const [fieldType, setFieldType] = useState("text");
@@ -55,7 +73,6 @@ function Form(props: { closeForm: () => void }) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       saveFormData(fields);
-      console.log("Saving data");
     }, 1000);
 
     return () => {
