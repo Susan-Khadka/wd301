@@ -9,7 +9,7 @@ function Formfield(props: {
   onChangeCB: (id: number, value: string) => void;
 }) {
   return (
-    <React.Fragment>
+    <>
       <label className="" htmlFor="">
         {props.labelText}
       </label>
@@ -29,7 +29,7 @@ function Formfield(props: {
           Delete
         </button>
       </div>
-    </React.Fragment>
+    </>
   );
 }
 

@@ -1,69 +1,43 @@
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Formfield from "./Formfield";
+import { FormData, FormField } from "../types/formTypes";
 
-interface formData {
-  id: number;
-  title: string;
-  formFields: FormField[];
-}
 
-interface FormField {
-  id: number;
-  label: string;
-  type: string;
-  value: string;
-}
-
-const initialFormFields: FormField[] = [
-  { id: 1, label: "First Name", type: "text", value: "" },
-  { id: 2, label: "Last Name", type: "text", value: "" },
-  { id: 3, label: "Email", type: "email", value: "" },
-  { id: 4, label: "Date of Birth", type: "date", value: "" },
-  { id: 5, label: "Contact No", type: "tel", value: "" },
-];
-
-const getLocalForms: () => formData[] = () => {
+const getLocalForms: () => FormData[] = () => {
   const savedFormData = localStorage.getItem("savedForms");
   return savedFormData ? JSON.parse(savedFormData) : [];
 };
 
-const saveLocalForms = (localForms: formData[]) => {
+const saveLocalForms = (localForms: FormData[]) => {
   localStorage.setItem("savedForms", JSON.stringify(localForms));
 };
 
-const saveFormData = (currentData: formData) => {
+// To save the form data in local storage
+const saveFormData = (currentData: FormData) => {
   const localForms = getLocalForms();
-  const updatedLocalForms = localForms.map((form: formData) =>
+  const updatedLocalForms = localForms.map((form: FormData) =>
     form.id === currentData.id ? currentData : form
   );
   saveLocalForms(updatedLocalForms);
 };
 
+// To find the selected form
 const findSelectedForm = (id: number) => {
   const localForms = getLocalForms();
-  return localForms.find((form: formData) => form.id === id);
+  return localForms.find((form: FormData) => form.id === id);
 };
 
 function Form(props: { closeForm: () => void; selectedFormID: number }) {
-  const initialState: () => formData = () => {
-    const localForms = getLocalForms();
-    if (localForms.length > 0) {
-      return findSelectedForm(props.selectedFormID) || localForms[0];
-    }
-    const newForm = {
-      id: Number(new Date()),
-      title: "Untitled Form",
-      formFields: initialFormFields,
-    };
-
-    saveLocalForms([...localForms, newForm]);
-    return newForm;
-  };
   const [fields, setFields] = useState(() => initialState());
 
   const [newField, setNewField] = useState("");
   const [fieldType, setFieldType] = useState("text");
   const titleRef = useRef<HTMLInputElement>(null);
+
+  const initialState: () => FormData = () => {
+    const localForms = getLocalForms();
+    return findSelectedForm(props.selectedFormID) || localForms[0];
+  };
 
   useEffect(() => {
     const oldTitle = document.title;
@@ -74,6 +48,7 @@ function Form(props: { closeForm: () => void; selectedFormID: number }) {
     };
   }, []);
 
+  // Saves the form data in local storage after every 1 second of inactivity
   useEffect(() => {
     const timeout = setTimeout(() => {
       saveFormData(fields);
@@ -84,6 +59,7 @@ function Form(props: { closeForm: () => void; selectedFormID: number }) {
     };
   }, [fields]);
 
+  // To update the value of any field
   const onChangeCB = (id: number, value: string) => {
     setFields({
       ...fields,
@@ -99,6 +75,7 @@ function Form(props: { closeForm: () => void; selectedFormID: number }) {
     });
   };
 
+  // To clear all the fields value
   const clearFields = (event: FormEvent) => {
     setFields({
       ...fields,
@@ -108,6 +85,7 @@ function Form(props: { closeForm: () => void; selectedFormID: number }) {
     });
   };
 
+  // To add the new field
   const addField = (event: FormEvent) => {
     setFields({
       ...fields,
@@ -125,6 +103,7 @@ function Form(props: { closeForm: () => void; selectedFormID: number }) {
     setFieldType("text");
   };
 
+  // To remove any field
   const removeField = (id: number) => {
     setFields({
       ...fields,

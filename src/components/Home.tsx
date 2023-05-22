@@ -8,7 +8,6 @@ function Home(props: {
   getLocalFormsCB: () => FormData[];
   deleteFormCB: (id: number) => void;
   openFormCB: (id: number) => void;
-  // saveLocalFormsCB: (localForms: FormData[]) => void;
 }) {
   return (
     <>
