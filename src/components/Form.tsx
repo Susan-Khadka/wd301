@@ -27,21 +27,6 @@ const getLocalForms: () => formData[] = () => {
   return savedFormData ? JSON.parse(savedFormData) : [];
 };
 
-const initialState: () => formData = () => {
-  const localForms = getLocalForms();
-  if (localForms.length > 0) {
-    return localForms[0];
-  }
-  const newForm = {
-    id: Number(new Date()),
-    title: "Untitled Form",
-    formFields: initialFormFields,
-  };
-
-  saveLocalForms([...localForms, newForm]);
-  return newForm;
-};
-
 const saveLocalForms = (localForms: formData[]) => {
   localStorage.setItem("savedForms", JSON.stringify(localForms));
 };
@@ -54,7 +39,26 @@ const saveFormData = (currentData: formData) => {
   saveLocalForms(updatedLocalForms);
 };
 
-function Form(props: { closeForm: () => void }) {
+const findSelectedForm = (id: number) => {
+  const localForms = getLocalForms();
+  return localForms.find((form: formData) => form.id === id);
+};
+
+function Form(props: { closeForm: () => void; selectedFormID: number }) {
+  const initialState: () => formData = () => {
+    const localForms = getLocalForms();
+    if (localForms.length > 0) {
+      return findSelectedForm(props.selectedFormID) || localForms[0];
+    }
+    const newForm = {
+      id: Number(new Date()),
+      title: "Untitled Form",
+      formFields: initialFormFields,
+    };
+
+    saveLocalForms([...localForms, newForm]);
+    return newForm;
+  };
   const [fields, setFields] = useState(() => initialState());
 
   const [newField, setNewField] = useState("");
