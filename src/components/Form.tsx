@@ -1,6 +1,7 @@
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Formfield from "./Formfield";
 import { FormData, FormField } from "../types/formTypes";
+import { navigate } from "raviger";
 
 // Get the saved forms from local storage
 const getLocalForms: () => FormData[] = () => {
@@ -28,7 +29,7 @@ const findSelectedForm = (id: number) => {
   return localForms.find((form: FormData) => form.id === id);
 };
 
-function Form(props: { closeForm: () => void; selectedFormID: number }) {
+function Form(props: { selectedFormID: number }) {
   const initialState: () => FormData = () => {
     const localForms = getLocalForms();
     return findSelectedForm(props.selectedFormID) || localForms[0];
@@ -208,7 +209,9 @@ function Form(props: { closeForm: () => void; selectedFormID: number }) {
         </button>
         <button
           className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
-          onClick={props.closeForm}
+          onClick={() => {
+            navigate("/");
+          }}
         >
           Close Form
         </button>

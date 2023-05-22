@@ -1,7 +1,5 @@
 // import logo from "./logo.svg";
 
-import AppContainer from "../src/hoc/AppContainer";
-import Header from "./Header";
 import React, { useState } from "react";
 import Home from "./components/Home";
 import Form from "./components/Form";
@@ -56,27 +54,17 @@ function App() {
     switchSelectedForm(formId);
   };
 
-  const closeForm = () => {
-    setState("HOME");
-  };
 
-  return (
-    <AppContainer>
-      <div className="w-1/3 p-4 mx-auto bg-white shadow-lg rounded-xl">
-        <Header title="Welcome to #react-with-typescript and tailwind" />
-        {state === "HOME" ? (
-          <Home
-            formData={formData}
-            addFormsCB={addForms}
-            getLocalFormsCB={getLocalForms}
-            deleteFormCB={deleteForm}
-            openFormCB={openForm}
-          />
-        ) : (
-          <Form selectedFormID={selectedForm} closeForm={closeForm} />
-        )}
-      </div>
-    </AppContainer>
+  return state === "HOME" ? (
+    <Home
+      formData={formData}
+      addFormsCB={addForms}
+      getLocalFormsCB={getLocalForms}
+      deleteFormCB={deleteForm}
+      openFormCB={openForm}
+    />
+  ) : (
+    <Form selectedFormID={selectedForm} />
   );
 }
 

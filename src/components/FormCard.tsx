@@ -1,5 +1,6 @@
 import React from "react";
 import { FormField } from "../types/formTypes";
+import { navigate } from "raviger";
 
 function FormCard(props: {
   id: number;
@@ -15,7 +16,7 @@ function FormCard(props: {
         <div className="flex gap-4">
           <button
             onClick={(event) => {
-              props.openFormCB(props.id);
+              navigate(`/form/${props.id}`);
             }}
             className="bg-white p-2 rounded-lg"
           >
