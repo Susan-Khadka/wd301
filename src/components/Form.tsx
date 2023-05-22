@@ -2,12 +2,13 @@ import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Formfield from "./Formfield";
 import { FormData, FormField } from "../types/formTypes";
 
-
+// Get the saved forms from local storage
 const getLocalForms: () => FormData[] = () => {
   const savedFormData = localStorage.getItem("savedForms");
   return savedFormData ? JSON.parse(savedFormData) : [];
 };
 
+// Save all the forms in local storage
 const saveLocalForms = (localForms: FormData[]) => {
   localStorage.setItem("savedForms", JSON.stringify(localForms));
 };
@@ -28,16 +29,16 @@ const findSelectedForm = (id: number) => {
 };
 
 function Form(props: { closeForm: () => void; selectedFormID: number }) {
+  const initialState: () => FormData = () => {
+    const localForms = getLocalForms();
+    return findSelectedForm(props.selectedFormID) || localForms[0];
+  };
+
   const [fields, setFields] = useState(() => initialState());
 
   const [newField, setNewField] = useState("");
   const [fieldType, setFieldType] = useState("text");
   const titleRef = useRef<HTMLInputElement>(null);
-
-  const initialState: () => FormData = () => {
-    const localForms = getLocalForms();
-    return findSelectedForm(props.selectedFormID) || localForms[0];
-  };
 
   useEffect(() => {
     const oldTitle = document.title;
