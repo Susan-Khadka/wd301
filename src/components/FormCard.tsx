@@ -7,11 +7,10 @@ function FormCard(props: {
   title: string;
   formFields: FormField[];
   deleteFormCB: (id: number) => void;
-  openFormCB: (id: number) => void;
 }) {
   return (
     <>
-      <div className="flex justify-between items-center bg-slate-200 px-2 py-4 rounded-md border border-black my-3">
+      <div className="flex justify-between items-center px-2 py-4 rounded-md border border-black my-5 shadow-xl">
         <div>{props.title}</div>
         <div className="flex gap-4">
           <button

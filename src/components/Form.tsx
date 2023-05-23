@@ -50,6 +50,13 @@ function Form(props: { selectedFormID: number }) {
     };
   }, []);
 
+  // To check if the selected form is present in local storage
+  useEffect(() => {
+    if (props.selectedFormID !== fields.id) {
+      navigate("/");
+    }
+  }, [props.selectedFormID, fields.id]);
+
   // Saves the form data in local storage after every 1 second of inactivity
   useEffect(() => {
     const timeout = setTimeout(() => {

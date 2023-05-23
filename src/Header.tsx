@@ -1,6 +1,6 @@
 import React from "react";
 import logo from "./logo.svg";
-import { Link } from "raviger";
+import { ActiveLink } from "raviger";
 
 function Header() {
   return (
@@ -12,12 +12,20 @@ function Header() {
         alt="logo"
       />
       <div className="flex w-full">
-        <Link href="/" className="text-center text-xl font-medium flex-1">
+        <ActiveLink
+          href="/"
+          exactActiveClass="text-blue-800"
+          className="text-center text-gray-700 text-xl font-medium flex-1"
+        >
           Home
-        </Link>
-        <Link href="/about" className="text-center text-xl font-medium flex-1">
+        </ActiveLink>
+        <ActiveLink
+          href="/about"
+          exactActiveClass=" text-blue-800"
+          className="text-center text-gray-700 text-xl font-medium flex-1"
+        >
           About
-        </Link>
+        </ActiveLink>
       </div>
     </div>
   );
