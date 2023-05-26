@@ -1,7 +1,7 @@
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Formfield from "./Formfield";
 import { FormData, FormField } from "../types/formTypes";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 
 // Get the saved forms from local storage
 const getLocalForms: () => FormData[] = () => {
@@ -69,14 +69,14 @@ function Form(props: { selectedFormID: number }) {
   }, [fields]);
 
   // To update the value of any field
-  const onChangeCB = (id: number, value: string) => {
+  const onChangeCB = (id: number, label: string) => {
     setFields({
       ...fields,
       formFields: fields.formFields.map((field: FormField) => {
         if (field.id === id) {
           return {
             ...field,
-            value,
+            label,
           };
         }
         return field;
@@ -144,10 +144,7 @@ function Form(props: { selectedFormID: number }) {
                 onChangeCB={onChangeCB}
                 key={fields.id}
                 removeFieldCB={removeField}
-                id={fields.id}
-                labelText={fields.label}
-                type={fields.type}
-                value={fields.value}
+                fields={fields}
               />
             );
           })}
@@ -174,7 +171,6 @@ function Form(props: { selectedFormID: number }) {
             <option value="tel">Phone</option>
             <option value="number">Number</option>
             <option value="password">Password</option>
-            <option value="textarea">Textarea</option>
           </select>
           <button
             onClick={addField}
@@ -222,6 +218,38 @@ function Form(props: { selectedFormID: number }) {
         >
           Close Form
         </button>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          onChange={(event) => {}}
+          value={`http://localhost:3000/preview/${fields.id}`}
+          className="border border-gray-200 bg-gray-50 rounded-lg p-2 mt-2 mb-4 flex-1"
+          type={"text"}
+        />
+        <Link
+          type="button"
+          href={`/preview/${fields.id}`}
+          // onClick={() => {
+          //   navigate(`/preview/${fields.id}`);
+          // }}
+          className="px-2 py-2 border flex mb-2 justify-center rounded-md bg-blue-500 text-white"
+          target="_blank"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+            />
+          </svg>
+        </Link>
       </div>
     </div>
   );

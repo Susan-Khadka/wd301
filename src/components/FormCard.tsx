@@ -10,14 +10,14 @@ function FormCard(props: {
 }) {
   return (
     <>
-      <div className="flex justify-between items-center px-2 py-4 rounded-md border border-black my-5 shadow-xl">
+      <div className="flex justify-between items-center px-2 py-4 rounded-md border border-slate-200 my-5 shadow-lg">
         <div>{props.title}</div>
         <div className="flex gap-4">
           <button
             onClick={(event) => {
               navigate(`/form/${props.id}`);
             }}
-            className="bg-white p-2 rounded-lg"
+            className="bg-white p-2 rounded-lg border"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +38,7 @@ function FormCard(props: {
             onClick={(event) => {
               props.deleteFormCB(props.id);
             }}
-            className="bg-white p-2 rounded-lg"
+            className="bg-white p-2 rounded-lg border"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

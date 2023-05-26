@@ -93,7 +93,10 @@ function Home() {
           })}
       </div>
       <div className="mt-4">
-        <button onClick={addForms} className="w-full p-3 text-center border">
+        <button
+          onClick={addForms}
+          className="w-full p-3 text-center border border-slate-200 rounded-md shadow-xl"
+        >
           Create New Form
         </button>
       </div>
