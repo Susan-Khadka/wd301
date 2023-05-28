@@ -1,112 +1,154 @@
-import React, { useState, MouseEvent } from "react";
-import { FormData, FormField } from "../types/formTypes";
+import React, { useState, MouseEvent, useEffect } from "react";
+import { FormData } from "../types/formTypes";
+import { navigate } from "raviger";
 
-// Get the saved forms from local storage
-const getLocalForms: () => FormData[] = () => {
-  const savedFormData = localStorage.getItem("savedForms");
-  return savedFormData ? JSON.parse(savedFormData) : [];
+import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
+
+const currentForm: (id: number) => FormData = (id: number) => {
+  const allLocalForms = getLocalForms();
+  const selectedForm: FormData | undefined = allLocalForms.find(
+    (form: FormData) => form.id === id
+  );
+  if (selectedForm === undefined) {
+    navigate("/error");
+    return allLocalForms[0];
+  }
+  return selectedForm;
 };
 
-const findSelectedForm = (id: number) => {
-  const localForms = getLocalForms();
-  const selectedForm = localForms.find((form: FormData) => form.id === id);
-  return selectedForm ? selectedForm : localForms[0];
-};
-
-const saveLocalForms = (form: FormData) => {
-  // const localForms = getLocalForms();
-  console.log(form);
-  // localStorage.setItem("savedForms", JSON.stringify(localForms));
+const savetoLocalForms = (localForms: FormData[]) => {
+  const allLocalForms: FormData[] = getLocalForms();
+  const updatedLocalForms = allLocalForms.map((form) => {
+    return form.id === localForms[0].id ? localForms[0] : form;
+  });
+  saveLocalForms(updatedLocalForms);
 };
 
 function Preview(props: { formId: number }) {
-  const [form, setForm] = useState(findSelectedForm(props.formId));
-  const formFields = form.formFields;
-  const [currentFieldIndex, setCurrentFieldIndex] = useState<number>(0);
+  //   currentForm(props.formId);
+  const [form, setForm] = useState<FormData>(currentForm(props.formId));
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [currentField, setCurrentField] = useState(
-    formFields?.[currentFieldIndex]
+    form.formFields[currentIndex]
   );
+  const [submitStatus, setSubmitStatus] = useState(false);
 
-  // console.log(formFields);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      savetoLocalForms([form]);
+    }, 1000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [form]);
 
   const handlePrevious: (e: MouseEvent) => void = (e: MouseEvent) => {
     e.preventDefault();
-    setCurrentField(formFields?.[currentFieldIndex - 1]);
-    setCurrentFieldIndex(currentFieldIndex - 1);
+    setCurrentField(form.formFields?.[currentIndex - 1]);
+    setCurrentIndex(currentIndex - 1);
   };
 
   const handleNext: (e: MouseEvent) => void = (e: MouseEvent) => {
     e.preventDefault();
-    setCurrentField(formFields?.[currentFieldIndex + 1]);
-    setCurrentFieldIndex(currentFieldIndex + 1);
+    setCurrentField(form.formFields?.[currentIndex + 1]);
+    setCurrentIndex(currentIndex + 1);
   };
 
-  const handleOnChange = (id: number, value: string) => {
-    console.log("Before: " + formFields?.[currentFieldIndex]);
+  const handleChanges = (id: number, value: string) => {
     setCurrentField({ ...currentField, value });
-    setForm({
-      ...form,
-      formFields: formFields.map((field: FormField) => {
-        return id === field.id ? { ...field, value } : field;
-      }),
+    const updatedFormFields = form.formFields.map((field) => {
+      return id === field.id ? { ...field, value } : field;
     });
-    saveLocalForms(form);
+    setForm({ ...form, formFields: updatedFormFields });
   };
 
-  // const onChangeCB = (id: number, label: string) => {
-  //   setFields({
-  //     ...fields,
-  //     formFields: fields.formFields.map((field: FormField) => {
-  //       if (field.id === id) {
-  //         return {
-  //           ...field,
-  //           label,
-  //         };
-  //       }
-  //       return field;
-  //     }),
-  //   });
-  // };
+  const handleSubmit = (e: MouseEvent) => {
+    e.preventDefault();
+    savetoLocalForms([form]);
+    setSubmitStatus(true);
+  };
 
   return (
     <div className="mx-2">
-      <p className="text-2xl text-center my-4">{form.title}</p>
-      <label className="block" htmlFor={currentField.label}>
-        {currentField.label}
-      </label>
-      <input
-        onChange={(e) => {
-          handleOnChange(currentField.id, e.target.value);
-        }}
-        name={currentField.label}
-        value={currentField.value}
-        className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
-        type={currentField?.type}
-      />
-      <div className="flex justify-between">
-        <div className="w-full">
-          {currentFieldIndex > 0 && (
-            <button
-              onClick={(e) => {
-                handlePrevious(e);
-              }}
-              className="p-2 border rounded-lg"
-            >
-              Previous
-            </button>
-          )}
+      {submitStatus ? (
+        <div className="h-20 w-full bg-slate-200 flex justify-center items-center rounded-lg">
+          <p className="w-full text-center text-2xl font-medium">
+            Form Submitted!!!
+          </p>
         </div>
-        {currentFieldIndex < formFields.length - 1 && (
-          <button
-            onClick={(e) => {
-              handleNext(e);
-            }}
-            className="p-2 border rounded-lg"
-          >
-            Next
-          </button>
-        )}
-      </div>
+      ) : (
+        <>
+          <p className="text-2xl text-center my-4">{form.title}</p>
+          <label className="block" htmlFor={currentField.label}>
+            {currentField.label}
+          </label>
+          {currentField.kind === "text" ? (
+            <input
+              onChange={(e) => {
+                handleChanges(currentField.id, e.target.value);
+              }}
+              name={currentField.label}
+              value={currentField.value}
+              className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
+              type={currentField.type}
+            />
+          ) : (
+            <div>
+              {/* Need to add dropdown here  */}
+              <select
+                defaultValue={currentField.value}
+                onChange={(e) => {
+                  handleChanges(currentField.id, e.target.value);
+                }}
+                className="border w-full border-gray-200 rounded-lg py-3 px-2 mt-2 mb-4 flex-1"
+              >
+                {currentField.options?.map((option, index) => {
+                  return (
+                    <option key={`${option}-${index}`} value={option}>
+                      {option}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          )}
+
+          <div className="flex justify-between">
+            <div className="w-full">
+              {currentIndex > 0 && (
+                <button
+                  onClick={(e) => {
+                    handlePrevious(e);
+                  }}
+                  className="p-2 border bg-blue-500 text-white rounded-lg"
+                >
+                  Previous
+                </button>
+              )}
+            </div>
+            {currentIndex < form.formFields.length - 1 && (
+              <button
+                onClick={(e) => {
+                  handleNext(e);
+                }}
+                className="p-2 border bg-blue-500 text-white rounded-lg"
+              >
+                Next
+              </button>
+            )}
+            {currentIndex === form.formFields.length - 1 && (
+              <button
+                onClick={(e) => {
+                  handleSubmit(e);
+                }}
+                className="p-2 border text-white rounded-lg bg-red-600"
+              >
+                Submit
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

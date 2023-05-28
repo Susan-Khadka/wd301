@@ -2,23 +2,27 @@ import React, { useState } from "react";
 import FormCard from "./FormCard";
 import { FormData, FormField } from "../types/formTypes";
 import { navigate, useQueryParams } from "raviger";
+import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 
 // Initial form fields for a form
 const initialFormFields: FormField[] = [
-  { id: 1, label: "First Name", type: "text", value: "" },
-  { id: 2, label: "Last Name", type: "text", value: "" },
+  { id: 1, label: "First Name", type: "text", value: "", kind: "text" },
+  { id: 2, label: "Last Name", type: "text", value: "", kind: "text" },
+  {
+    id: 3,
+    label: "Priority",
+    options: ["High", "Low", "Medium"],
+    value: "",
+    kind: "dropdown",
+  },
+  {
+    id: 4,
+    label: "Priority",
+    options: ["High", "Low", "Medium"],
+    value: "",
+    kind: "radio",
+  },
 ];
-
-// Get all local forms from local storage
-const getLocalForms: () => FormData[] = () => {
-  const savedFormData = localStorage.getItem("savedForms");
-  return savedFormData ? JSON.parse(savedFormData) : [];
-};
-
-// Save the form data in local storage
-const saveLocalForms = (localForms: FormData[]) => {
-  localStorage.setItem("savedForms", JSON.stringify(localForms));
-};
 
 function Home() {
   const [formData, setFormData] = useState<FormData[]>([...getLocalForms()]);

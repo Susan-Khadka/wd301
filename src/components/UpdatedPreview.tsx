@@ -2,14 +2,10 @@ import React, { useState, MouseEvent, useEffect } from "react";
 import { FormData } from "../types/formTypes";
 import { navigate } from "raviger";
 
-const getAllLocalForms: () => FormData[] = () => {
-  const savedFormData: string = localStorage.getItem("savedForms") || "";
-  const parsedFormData: FormData[] = JSON.parse(savedFormData);
-  return parsedFormData;
-};
+import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 
 const currentForm: (id: number) => FormData = (id: number) => {
-  const allLocalForms = getAllLocalForms();
+  const allLocalForms = getLocalForms();
   const selectedForm: FormData | undefined = allLocalForms.find(
     (form: FormData) => form.id === id
   );
@@ -21,11 +17,11 @@ const currentForm: (id: number) => FormData = (id: number) => {
 };
 
 const savetoLocalForms = (localForms: FormData[]) => {
-  const allLocalForms: FormData[] = getAllLocalForms();
+  const allLocalForms: FormData[] = getLocalForms();
   const updatedLocalForms = allLocalForms.map((form) => {
     return form.id === localForms[0].id ? localForms[0] : form;
   });
-  localStorage.setItem("savedForms", JSON.stringify(updatedLocalForms));
+  saveLocalForms(updatedLocalForms);
 };
 
 function UpdatedPreview(props: { formId: number }) {
@@ -85,15 +81,20 @@ function UpdatedPreview(props: { formId: number }) {
           <label className="block" htmlFor={currentField.label}>
             {currentField.label}
           </label>
-          <input
-            onChange={(e) => {
-              handleChanges(currentField.id, e.target.value);
-            }}
-            name={currentField.label}
-            value={currentField.value}
-            className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
-            type={currentField.type}
-          />
+          {currentField.kind === "text" ? (
+            <input
+              onChange={(e) => {
+                handleChanges(currentField.id, e.target.value);
+              }}
+              name={currentField.label}
+              value={currentField.value}
+              className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
+              type={currentField.type}
+            />
+          ) : (
+            <div>Hello</div>
+          )}
+
           <div className="flex justify-between">
             <div className="w-full">
               {currentIndex > 0 && (

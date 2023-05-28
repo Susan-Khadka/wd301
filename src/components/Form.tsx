@@ -1,18 +1,9 @@
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Formfield from "./Formfield";
-import { FormData, FormField } from "../types/formTypes";
+import { FormData, FormField, allFieldTypes } from "../types/formTypes";
 import { Link, navigate } from "raviger";
-
-// Get the saved forms from local storage
-const getLocalForms: () => FormData[] = () => {
-  const savedFormData = localStorage.getItem("savedForms");
-  return savedFormData ? JSON.parse(savedFormData) : [];
-};
-
-// Save all the forms in local storage
-const saveLocalForms = (localForms: FormData[]) => {
-  localStorage.setItem("savedForms", JSON.stringify(localForms));
-};
+import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
+import Otherfields from "./Otherfields";
 
 // To save the form data in local storage
 const saveFormData = (currentData: FormData) => {
@@ -38,8 +29,10 @@ function Form(props: { selectedFormID: number }) {
   const [fields, setFields] = useState(() => initialState());
 
   const [newField, setNewField] = useState("");
-  const [fieldType, setFieldType] = useState("text");
+  const [fieldType, setFieldType] = useState<allFieldTypes>("text");
   const titleRef = useRef<HTMLInputElement>(null);
+  // const textFields = ["text", "email", "number", "date", "tel", "password"];
+  // const otherFields = ["radio", "dropdown"];
 
   useEffect(() => {
     const oldTitle = document.title;
@@ -68,6 +61,16 @@ function Form(props: { selectedFormID: number }) {
     };
   }, [fields]);
 
+  // To clear all the fields value
+  const clearFields = (event: FormEvent) => {
+    setFields({
+      ...fields,
+      formFields: fields.formFields.map((field: FormField) => {
+        return { ...field, value: "" };
+      }),
+    });
+  };
+
   // To update the value of any field
   const onChangeCB = (id: number, label: string) => {
     setFields({
@@ -84,30 +87,85 @@ function Form(props: { selectedFormID: number }) {
     });
   };
 
-  // To clear all the fields value
-  const clearFields = (event: FormEvent) => {
+  const addOptionsCB = (id: number, options: string[]) => {
     setFields({
       ...fields,
       formFields: fields.formFields.map((field: FormField) => {
-        return { ...field, value: "" };
+        if (field.id === id) {
+          return {
+            ...field,
+            options,
+          };
+        }
+        return field;
+      }),
+    });
+  };
+
+  // Change options value for dropdown field
+  const optionChangeCB = (id: number, options: string[]) => {
+    setFields({
+      ...fields,
+      formFields: fields.formFields.map((field: FormField) => {
+        if (field.id === id) {
+          return {
+            ...field,
+            options,
+          };
+        }
+        return field;
+      }),
+    });
+  };
+
+  // Delete the option value for dropdown field
+  const deleteOptionCB = (id: number, options: string[]) => {
+    setFields({
+      ...fields,
+      formFields: fields.formFields.map((field: FormField) => {
+        if (field.id === id) {
+          return {
+            ...field,
+            options,
+          };
+        }
+        return field;
       }),
     });
   };
 
   // To add the new field
   const addField = (event: FormEvent) => {
-    setFields({
-      ...fields,
-      formFields: [
-        ...fields.formFields,
-        {
-          id: Number(new Date()),
-          label: newField,
-          type: fieldType,
-          value: "",
-        },
-      ],
-    });
+    event.preventDefault();
+    if (fieldType === "dropdown" || fieldType === "radio") {
+      setFields({
+        ...fields,
+        formFields: [
+          ...fields.formFields,
+          {
+            kind: fieldType,
+            id: Number(new Date()),
+            label: newField,
+            value: "",
+            options: [],
+          },
+        ],
+      });
+    } else {
+      setFields({
+        ...fields,
+        formFields: [
+          ...fields.formFields,
+          {
+            kind: "text",
+            id: Number(new Date()),
+            label: newField,
+            type: fieldType,
+            value: "",
+          },
+        ],
+      });
+    }
     setNewField("");
     setFieldType("text");
   };
@@ -139,14 +197,44 @@ function Form(props: { selectedFormID: number }) {
       <div className="">
         <form className="px-2 mt-4">
           {fields.formFields.map((fields: FormField) => {
-            return (
-              <Formfield
-                onChangeCB={onChangeCB}
-                key={fields.id}
-                removeFieldCB={removeField}
-                fields={fields}
-              />
-            );
+            // const switchField =
+            switch (fields.kind) {
+              case "text":
+                return (
+                  <Formfield
+                    key={fields.id}
+                    onChangeCB={onChangeCB}
+                    removeFieldCB={removeField}
+                    fields={fields}
+                  />
+                );
+              case "dropdown" :
+                return (
+                  <Otherfields
+                    key={fields.id}
+                    onChangeCB={onChangeCB}
+                    removeFieldCB={removeField}
+                    fields={fields}
+                    optionChangeCB={optionChangeCB}
+                    deleteOptionCB={deleteOptionCB}
+                    addOptionCB={addOptionsCB}
+                  />
+                );
+              case "radio" :
+                return (
+                  <Otherfields
+                    key={fields.id}
+                    onChangeCB={onChangeCB}
+                    removeFieldCB={removeField}
+                    fields={fields}
+                    optionChangeCB={optionChangeCB}
+                    deleteOptionCB={deleteOptionCB}
+                    addOptionCB={addOptionsCB}
+                  />
+                );
+              default:
+                return null;
+            }
           })}
         </form>
       </div>
@@ -160,7 +248,11 @@ function Form(props: { selectedFormID: number }) {
         <div className="flex gap-2 mb-2">
           <select
             value={fieldType}
-            onChange={(event) => setFieldType(event.target.value)}
+            onChange={(event) => {
+              console.log(event.target.value);
+              const value = event.target.value as allFieldTypes;
+              setFieldType(value);
+            }}
             className="p-2 border rounded-md w-11/12"
             name="type"
             id="type"
@@ -171,6 +263,8 @@ function Form(props: { selectedFormID: number }) {
             <option value="tel">Phone</option>
             <option value="number">Number</option>
             <option value="password">Password</option>
+            <option value="dropdown">Dropdown</option>
+            <option value="radio">Radio</option>
           </select>
           <button
             onClick={addField}
@@ -229,9 +323,6 @@ function Form(props: { selectedFormID: number }) {
         <Link
           type="button"
           href={`/preview/${fields.id}`}
-          // onClick={() => {
-          //   navigate(`/preview/${fields.id}`);
-          // }}
           className="px-2 py-2 border flex mb-2 justify-center rounded-md bg-blue-500 text-white"
           target="_blank"
         >

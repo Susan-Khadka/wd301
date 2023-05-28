@@ -3,8 +3,8 @@ import AppContainer from "../hoc/AppContainer";
 import App from "../App";
 import About from "../components/About";
 import Form from "../components/Form";
-// import Preview from "../components/Preview";
-import UpdatedPreview from "../components/UpdatedPreview";
+import Preview from "../components/Preview";
+// import UpdatedPreview from "../components/UpdatedPreview";
 import Errorpage from "../components/Errorpage";
 
 const routes = {
@@ -13,7 +13,7 @@ const routes = {
   "/about": () => <About />,
   "/form/:id": ({ id }: { id: string }) => <Form selectedFormID={Number(id)} />,
   "/preview/:id": ({ id }: { id: string }) => (
-    <UpdatedPreview formId={Number(id)} />
+    <Preview formId={Number(id)} />
   ),
 };
 

@@ -1,22 +1,14 @@
 import React from "react";
+import { TextField } from "../types/formTypes";
 
 function Formfield(props: {
-  // type: string;
-  // id: number;
-  // labelText: string;
   removeFieldCB: (id: number) => void;
-  // value: string;
   onChangeCB: (id: number, value: string) => void;
-  fields: {
-    id: number;
-    label: string;
-    type: string;
-    value: string;
-  };
+  fields: TextField;
 }) {
   return (
-    <>
-      <label className="" htmlFor="">
+    <div className="mb-4">
+      <label htmlFor={`${props.fields.type}-${props.fields.id}`}>
         {props.fields.type}
       </label>
       <div className="flex gap-2 items-center">
@@ -24,8 +16,10 @@ function Formfield(props: {
           onChange={(event) => {
             props.onChangeCB(props.fields.id, event.target.value);
           }}
+          id={`${props.fields.type}-${props.fields.id}`}
+          name={`${props.fields.type}-${props.fields.id}`}
           value={props.fields.label}
-          className="border border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
+          className="border border-gray-200 rounded-lg p-2 flex-1"
           type={"text"}
         />
         <button
@@ -48,7 +42,7 @@ function Formfield(props: {
           </svg>
         </button>
       </div>
-    </>
+    </div>
   );
 }
 
