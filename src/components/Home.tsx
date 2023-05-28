@@ -22,6 +22,13 @@ const initialFormFields: FormField[] = [
     value: "",
     kind: "radio",
   },
+  {
+    id: 5,
+    label: "Priority",
+    options: ["High", "Low", "Medium"],
+    value: "",
+    kind: "checkbox",
+  },
 ];
 
 function Home() {
@@ -52,7 +59,7 @@ function Home() {
     saveLocalForms(updatedLocalForms);
   };
   return (
-    <>
+    <div>
       <div className="flex-col my-3 gap-4">
         <div className="my-10">
           <form
@@ -104,7 +111,7 @@ function Home() {
           Create New Form
         </button>
       </div>
-    </>
+    </div>
   );
 }
 

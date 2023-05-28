@@ -7,7 +7,7 @@ function Formfield(props: {
   fields: TextField;
 }) {
   return (
-    <div className="mb-4">
+    <div className="mb-4 border p-2 rounded-lg bg-zinc-50">
       <label htmlFor={`${props.fields.type}-${props.fields.id}`}>
         {props.fields.type}
       </label>

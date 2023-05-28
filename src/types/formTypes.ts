@@ -6,7 +6,7 @@ export type FormData = {
 
 export type textFieldTypes = "text" | "email" | "password" | "number" | "tel" | "date";
 
-export type otherFieldTypes = "dropdown" | "radio";
+export type otherFieldTypes = "dropdown" | "radio" | "checkbox";
 
 export type allFieldTypes = textFieldTypes | otherFieldTypes;
 
@@ -34,5 +34,13 @@ export type radioField = {
     value: string;
 }
 
+export type checkboxField = {
+    kind: "checkbox";
+    id: number;
+    label: string;
+    options: string[];
+    value: string;
+}
 
-export type FormField = TextField | DropdownField | radioField;
+
+export type FormField = TextField | DropdownField | radioField | checkboxField;

@@ -4,8 +4,8 @@ import Header from "../Header";
 
 function AppContainer(props: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen bg-gray-100 items-center justify-center">
-      <div className="w-1/3 p-4 mx-auto bg-white shadow-lg rounded-xl">
+    <div className="flex h-screen py-5 bg-gray-100 items-center justify-center">
+      <div className="w-1/3 p-4 mx-auto bg-white shadow-lg rounded-xl overflow-auto">
         <Header />
         {props.children}
       </div>

@@ -1,8 +1,8 @@
 import React, { ChangeEvent, useState } from "react";
-import { DropdownField, radioField } from "../types/formTypes";
+import { DropdownField, checkboxField, radioField } from "../types/formTypes";
 
 function Otherfields(props: {
-  fields: DropdownField | radioField;
+  fields: DropdownField | radioField | checkboxField;
   onChangeCB: (id: number, value: string) => void;
   removeFieldCB: (id: number) => void;
   optionChangeCB: (id: number, options: string[]) => void;
@@ -26,7 +26,7 @@ function Otherfields(props: {
   };
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 border p-2 rounded-lg bg-zinc-50">
       <label className="" htmlFor={`${props.fields.kind}-${props.fields.id}`}>
         {props.fields.kind}
       </label>
@@ -113,7 +113,7 @@ function Otherfields(props: {
           );
         })}
       </div>
-      <div className="mt-5 flex gap-2">
+      <div className="mt-5 flex gap-2 ml-4">
         <input
           className="w-11/12 border border-gray-200 rounded-lg p-2 flex-1"
           value={newOption}
@@ -129,6 +129,7 @@ function Otherfields(props: {
             const updatedOptions = [...options, newOption];
             setOptions(updatedOptions);
             props.addOptionCB(props.fields.id, updatedOptions);
+            setNewOption("");
           }}
           className="bg-blue-500 text-white px-2 py-2 border rounded-md"
         >
