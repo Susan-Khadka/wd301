@@ -1,5 +1,5 @@
 import React, { useState, MouseEvent, useEffect } from "react";
-import { FormData } from "../types/formTypes";
+import { FormData, FormField } from "../types/formTypes";
 import { navigate } from "raviger";
 
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
@@ -55,11 +55,58 @@ function Preview(props: { formId: number }) {
   };
 
   const handleChanges = (id: number, value: string) => {
-    setCurrentField({ ...currentField, value });
-    const updatedFormFields = form.formFields.map((field) => {
-      return id === field.id ? { ...field, value } : field;
-    });
-    setForm({ ...form, formFields: updatedFormFields });
+    if (currentField.kind === "checkbox") {
+      if (currentField.value.includes(value)) {
+        let updatedFormFields: FormField[];
+        const valuesArray = currentField.value.split(" ");
+        const updatedArray = valuesArray.filter(
+          (currentValue) => currentValue !== value
+        );
+        setCurrentField({
+          ...currentField,
+          value: `${updatedArray.join(" ")}`,
+        });
+        updatedFormFields = form.formFields.map((field) => {
+          return id === field.id
+            ? { ...field, value: `${updatedArray.join(" ")}` }
+            : field;
+        });
+        setForm({ ...form, formFields: updatedFormFields });
+      } else {
+        if (currentField.value.length === 0) {
+          setCurrentField({
+            ...currentField,
+            value,
+          });
+          const updatedFormFields: FormField[] = form.formFields.map(
+            (field) => {
+              return id === field.id ? { ...field, value } : field;
+            }
+          );
+          setForm({ ...form, formFields: updatedFormFields });
+        } else {
+          setCurrentField({
+            ...currentField,
+            value: `${currentField.value} ${value}`,
+          });
+          const updatedFormFields: FormField[] = form.formFields.map(
+            (field) => {
+              return id === field.id
+                ? { ...field, value: `${currentField.value} ${value}` }
+                : field;
+            }
+          );
+          setForm({ ...form, formFields: updatedFormFields });
+        }
+      }
+      console.log(currentField);
+    } else {
+      setCurrentField({ ...currentField, value });
+      const updatedFormFields = form.formFields.map((field) => {
+        return id === field.id ? { ...field, value } : field;
+      });
+      setForm({ ...form, formFields: updatedFormFields });
+    }
   };
 
   const handleSubmit = (e: MouseEvent) => {
@@ -117,7 +164,10 @@ function Preview(props: { formId: number }) {
             <div className="mb-5">
               {currentField.options?.map((option, index) => {
                 return (
-                  <div className="flex gap-x-2" key={`${currentField.id}-${index}`}>
+                  <div
+                    className="flex gap-x-2"
+                    key={`${currentField.id}-${index}`}
+                  >
                     <input
                       onChange={(e) => {
                         handleChanges(currentField.id, e.target.value);
@@ -136,7 +186,32 @@ function Preview(props: { formId: number }) {
               })}
             </div>
           )}
-
+          {currentField.kind === "checkbox" && (
+            <div className="mb-5">
+              {currentField.options?.map((option, index) => {
+                return (
+                  <div
+                    className="flex gap-x-3"
+                    key={`${currentField.kind}-${index}`}
+                  >
+                    <input
+                      onChange={(e) => {
+                        handleChanges(currentField.id, e.target.value);
+                      }}
+                      type="checkbox"
+                      id={`${currentField.label}-${index}`}
+                      name={`${currentField.label}-${index}`}
+                      value={option}
+                      checked={currentField.value.includes(option)}
+                    />
+                    <label htmlFor={`${currentField.label}-${index}`}>
+                      {option}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           <div className="flex justify-between">
             <div className="w-full">
               {currentIndex > 0 && (
