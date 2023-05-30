@@ -82,7 +82,7 @@ function Preview(props: { formId: number }) {
           <label className="block" htmlFor={currentField.label}>
             {currentField.label}
           </label>
-          {currentField.kind === "text" ? (
+          {currentField.kind === "text" && (
             <input
               onChange={(e) => {
                 handleChanges(currentField.id, e.target.value);
@@ -92,7 +92,8 @@ function Preview(props: { formId: number }) {
               className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
               type={currentField.type}
             />
-          ) : (
+          )}
+          {currentField.kind === "dropdown" && (
             <div>
               {/* Need to add dropdown here  */}
               <select
@@ -110,6 +111,29 @@ function Preview(props: { formId: number }) {
                   );
                 })}
               </select>
+            </div>
+          )}
+          {currentField.kind === "radio" && (
+            <div className="mb-5">
+              {currentField.options?.map((option, index) => {
+                return (
+                  <div className="flex gap-x-2" key={`${currentField.id}-${index}`}>
+                    <input
+                      onChange={(e) => {
+                        handleChanges(currentField.id, e.target.value);
+                      }}
+                      type="radio"
+                      id={`${currentField.label}-${index}`}
+                      name={currentField.label}
+                      value={option}
+                      checked={currentField.value === option}
+                    />
+                    <label htmlFor={`${currentField.label}-${index}`}>
+                      {option}
+                    </label>
+                  </div>
+                );
+              })}
             </div>
           )}
 

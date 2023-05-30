@@ -4,7 +4,6 @@ import App from "../App";
 import About from "../components/About";
 import Form from "../components/Form";
 import Preview from "../components/Preview";
-// import UpdatedPreview from "../components/UpdatedPreview";
 import Errorpage from "../components/Errorpage";
 
 const routes = {
