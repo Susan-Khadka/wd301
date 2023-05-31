@@ -1,8 +1,8 @@
 import React, { ChangeEvent, useState } from "react";
-import { DropdownField, MultiselectDropdown, checkboxField, radioField } from "../types/formTypes";
+import { DropdownField, checkboxField, radioField } from "../types/formTypes";
 
 function Otherfields(props: {
-  fields: DropdownField | radioField | checkboxField | MultiselectDropdown;
+  fields: DropdownField | radioField | checkboxField ;
   onChangeCB: (id: number, value: string) => void;
   removeFieldCB: (id: number) => void;
   optionChangeCB: (id: number, options: string[]) => void;

@@ -82,8 +82,7 @@ function Form(props: { selectedFormID: number }) {
     "radio",
     "dropdown",
     "checkbox",
-    "textarea",
-    "multiselectdropdown",
+    "textarea"
   ];
   const allFields: allFieldTypes[] = [...textFields, ...otherFields];
 
@@ -130,6 +129,7 @@ function Form(props: { selectedFormID: number }) {
     });
   };
 
+  // Add Options for multi option fields
   const addOptionsCB = (id: number, options: string[]) => {
     setFields({
       ...fields,
@@ -208,20 +208,6 @@ function Form(props: { selectedFormID: number }) {
             id: Number(new Date()),
             label: newField,
             value: "",
-          },
-        ],
-      });
-    } else if (fieldType === "multiselectdropdown") {
-      setFields({
-        ...fields,
-        formFields: [
-          ...fields.formFields,
-          {
-            kind: fieldType,
-            id: Number(new Date()),
-            label: newField,
-            options: [],
-            value: [],
           },
         ],
       });
