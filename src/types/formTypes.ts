@@ -4,11 +4,7 @@ export type FormData = {
     formFields: FormField[];
 }
 
-export type textFieldTypes = "text" | "email" | "password" | "number" | "tel" | "date";
 
-export type otherFieldTypes = "dropdown" | "radio" | "checkbox" | "textarea";
-
-export type allFieldTypes = textFieldTypes | otherFieldTypes;
 
 export type TextField = {
     kind: "text";
@@ -24,6 +20,15 @@ export type DropdownField = {
     label: string;
     options: string[];
     value: string;
+}
+
+
+export type MultiselectDropdown = {
+    kind: "multiselectdropdown";
+    id: number;
+    label: string;
+    options: string[];
+    value: string[];
 }
 
 export type radioField = {
@@ -47,8 +52,12 @@ export type TextArea = {
     id: number;
     label: string;
     value: string;
-
 }
 
+export type textFieldTypes = "text" | "email" | "password" | "number" | "tel" | "date";
 
-export type FormField = TextField | DropdownField | radioField | checkboxField | TextArea;
+export type otherFieldTypes = "dropdown" | "radio" | "checkbox" | "textarea" | "multiselectdropdown";
+
+export type allFieldTypes = textFieldTypes | otherFieldTypes;
+
+export type FormField = TextField | DropdownField | radioField | checkboxField | TextArea | MultiselectDropdown;

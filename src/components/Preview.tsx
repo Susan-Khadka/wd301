@@ -212,6 +212,19 @@ function Preview(props: { formId: number }) {
               })}
             </div>
           )}
+          {currentField.kind === "textarea" && (
+            <div className="mb-2">
+              <textarea
+                onChange={(e) => {
+                  handleChanges(currentField.id, e.target.value);
+                }}
+                className="border mt-2 p-2 rounded-md w-full resize-none"
+                rows={5}
+                value={currentField.value}
+                name={`${currentField.kind}-${currentField.label}`}
+              />
+            </div>
+          )}
           <div className="flex justify-between">
             <div className="w-full">
               {currentIndex > 0 && (

@@ -1,8 +1,8 @@
 import React, { ChangeEvent, useState } from "react";
-import { DropdownField, checkboxField, radioField } from "../types/formTypes";
+import { DropdownField, MultiselectDropdown, checkboxField, radioField } from "../types/formTypes";
 
 function Otherfields(props: {
-  fields: DropdownField | radioField | checkboxField;
+  fields: DropdownField | radioField | checkboxField | MultiselectDropdown;
   onChangeCB: (id: number, value: string) => void;
   removeFieldCB: (id: number) => void;
   optionChangeCB: (id: number, options: string[]) => void;
@@ -61,7 +61,7 @@ function Otherfields(props: {
           </svg>
         </button>
       </div>
-      <div className="mt-5 ml-4">
+      <div className="mt-3 ml-4">
         <p>Options</p>
         {options.map((option, index) => {
           return (
@@ -113,7 +113,7 @@ function Otherfields(props: {
           );
         })}
       </div>
-      <div className="mt-5 flex gap-2 ml-4">
+      <div className="mt-2 flex gap-2 ml-4">
         <input
           className="w-11/12 border border-gray-200 rounded-lg p-2 flex-1"
           value={newOption}
