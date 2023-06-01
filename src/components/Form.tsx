@@ -1,4 +1,6 @@
 import React, { FormEvent, useEffect, useRef, useState } from "react";
+
+
 import Formfield from "./Formfield";
 import {
   FormData,
@@ -7,10 +9,11 @@ import {
   otherFieldTypes,
   textFieldTypes,
 } from "../types/formTypes";
+
 import { Link, navigate } from "raviger";
+
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 import Otherfields from "./Otherfields";
-import Textarea from "./Textarea";
 
 // To save the form data in local storage
 const saveFormData = (currentData: FormData) => {
@@ -82,7 +85,8 @@ function Form(props: { selectedFormID: number }) {
     "radio",
     "dropdown",
     "checkbox",
-    "textarea"
+    "textarea",
+    "multiselectdrop",
   ];
   const allFields: allFieldTypes[] = [...textFields, ...otherFields];
 
@@ -177,6 +181,10 @@ function Form(props: { selectedFormID: number }) {
     });
   };
 
+  // const addMultiSelectOption = (id: number, options: string[]) => {
+
+  // }
+
   // To add the new field
   const addField = (event: FormEvent) => {
     event.preventDefault();
@@ -208,6 +216,21 @@ function Form(props: { selectedFormID: number }) {
             id: Number(new Date()),
             label: newField,
             value: "",
+            type: fieldType,
+          },
+        ],
+      });
+    } else if (fieldType === "multiselectdrop") {
+      setFields({
+        ...fields,
+        formFields: [
+          ...fields.formFields,
+          {
+            kind: fieldType,
+            id: Number(new Date()),
+            label: newField,
+            value: [],
+            options: [],
           },
         ],
       });
@@ -257,20 +280,12 @@ function Form(props: { selectedFormID: number }) {
       <div className="">
         <form className="px-2 mt-4">
           {fields.formFields.map((fields: FormField) => {
-            if (fields.kind === "text") {
+            if (fields.kind === "text" || fields.kind === "textarea") {
               return (
                 <Formfield
                   key={fields.id}
                   onChangeCB={onChangeCB}
                   removeFieldCB={removeField}
-                  fields={fields}
-                />
-              );
-            } else if (fields.kind === "textarea") {
-              return (
-                <Textarea
-                  removeFieldCB={removeField}
-                  onChangeCB={onChangeCB}
                   fields={fields}
                 />
               );

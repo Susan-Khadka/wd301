@@ -1,14 +1,16 @@
 import React, { ChangeEvent, useState } from "react";
-import { DropdownField, checkboxField, radioField } from "../types/formTypes";
+import { DropdownField, MultiSelectDrop, checkboxField, radioField } from "../types/formTypes";
 
-function Otherfields(props: {
-  fields: DropdownField | radioField | checkboxField ;
+type Props = {
+  fields: DropdownField | radioField | checkboxField | MultiSelectDrop ;
   onChangeCB: (id: number, value: string) => void;
   removeFieldCB: (id: number) => void;
   optionChangeCB: (id: number, options: string[]) => void;
   deleteOptionCB: (id: number, options: string[]) => void;
   addOptionCB: (id: number, options: string[]) => void;
-}) {
+}
+
+function Otherfields(props: Props) {
   const [options, setOptions] = useState<string[]>(props.fields.options);
   const [newOption, setNewOption] = useState<string>("");
 

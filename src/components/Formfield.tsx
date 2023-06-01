@@ -1,10 +1,10 @@
 import React from "react";
-import { TextField } from "../types/formTypes";
+import { TextArea, TextField } from "../types/formTypes";
 
 function Formfield(props: {
   removeFieldCB: (id: number) => void;
   onChangeCB: (id: number, value: string) => void;
-  fields: TextField;
+  fields: TextField | TextArea;
 }) {
   return (
     <div className="mb-4 border p-2 rounded-lg bg-zinc-50">

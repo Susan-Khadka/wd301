@@ -54,10 +54,11 @@ function Preview(props: { formId: number }) {
     setCurrentIndex(currentIndex + 1);
   };
 
+  // Need to split this function into two functions
   const handleChanges = (id: number, value: string) => {
     if (currentField.kind === "checkbox") {
       if (currentField.value.includes(value)) {
-        let updatedFormFields: FormField[];
+        // let updatedFormFields: FormField[];
         const valuesArray = currentField.value.split(" ");
         const updatedArray = valuesArray.filter(
           (currentValue) => currentValue !== value
@@ -66,46 +67,46 @@ function Preview(props: { formId: number }) {
           ...currentField,
           value: `${updatedArray.join(" ")}`,
         });
-        updatedFormFields = form.formFields.map((field) => {
+        let updatedFormFields = form.formFields.map((field) => {
           return id === field.id
             ? { ...field, value: `${updatedArray.join(" ")}` }
             : field;
         });
-        setForm({ ...form, formFields: updatedFormFields });
+        setForm({ ...form, formFields: updatedFormFields as FormField[] });
       } else {
         if (currentField.value.length === 0) {
           setCurrentField({
             ...currentField,
             value,
           });
-          const updatedFormFields: FormField[] = form.formFields.map(
+          const updatedFormFields = form.formFields.map(
             (field) => {
               return id === field.id ? { ...field, value } : field;
             }
           );
-          setForm({ ...form, formFields: updatedFormFields });
+          setForm({ ...form, formFields: updatedFormFields as FormField[] });
         } else {
           setCurrentField({
             ...currentField,
             value: `${currentField.value} ${value}`,
           });
-          const updatedFormFields: FormField[] = form.formFields.map(
+          const updatedFormFields= form.formFields.map(
             (field) => {
               return id === field.id
                 ? { ...field, value: `${currentField.value} ${value}` }
                 : field;
             }
           );
-          setForm({ ...form, formFields: updatedFormFields });
+          setForm({ ...form, formFields: updatedFormFields as FormField[] });
         }
       }
       console.log(currentField);
-    } else {
+    } else if(currentField.kind !== "multiselectdrop") {
       setCurrentField({ ...currentField, value });
       const updatedFormFields = form.formFields.map((field) => {
         return id === field.id ? { ...field, value } : field;
       });
-      setForm({ ...form, formFields: updatedFormFields });
+      setForm({ ...form, formFields: updatedFormFields as FormField[] });
     }
   };
 
@@ -160,19 +161,19 @@ function Preview(props: { formId: number }) {
               </select>
             </div>
           )}
-          {currentField.kind === "radio" && (
+          {(currentField.kind === "radio" || currentField.kind === "checkbox") && (
             <div className="mb-5">
               {currentField.options?.map((option, index) => {
                 return (
                   <div
                     className="flex gap-x-2"
-                    key={`${currentField.id}-${index}`}
+                    key={`${currentField.kind}-${index}`}
                   >
                     <input
                       onChange={(e) => {
                         handleChanges(currentField.id, e.target.value);
                       }}
-                      type="radio"
+                      type={currentField.kind}
                       id={`${currentField.label}-${index}`}
                       name={currentField.label}
                       value={option}
@@ -186,7 +187,7 @@ function Preview(props: { formId: number }) {
               })}
             </div>
           )}
-          {currentField.kind === "checkbox" && (
+          {/* {currentField.kind === "checkbox" && (
             <div className="mb-5">
               {currentField.options?.map((option, index) => {
                 return (
@@ -211,9 +212,9 @@ function Preview(props: { formId: number }) {
                 );
               })}
             </div>
-          )}
+          )} */}
           {currentField.kind === "textarea" && (
-            <div className="mb-2">
+            <div className="mb-5">
               <textarea
                 onChange={(e) => {
                   handleChanges(currentField.id, e.target.value);
