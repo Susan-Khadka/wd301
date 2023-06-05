@@ -1,30 +1,37 @@
-import React, { ChangeEvent, useState } from "react";
-import { DropdownField, radioField } from "../types/formTypes";
+import React, { useState } from "react";
+import { MultiSelectDrop, Option, checkboxField } from "../types/formTypes";
+import { v4 as uuid } from "uuid";
 
 type Props = {
-  fields: DropdownField | radioField   ;
+  fields: checkboxField | MultiSelectDrop;
   onChangeCB: (id: number, value: string) => void;
   removeFieldCB: (id: number) => void;
-  optionChangeCB: (id: number, options: string[]) => void;
-  deleteOptionCB: (id: number, options: string[]) => void;
-  addOptionCB: (id: number, options: string[]) => void;
-}
+  optionUpdateCB: (id: number, options: Option[]) => void;
+};
 
-function Otherfields(props: Props) {
-  const [options, setOptions] = useState<string[]>(props.fields.options);
-  const [newOption, setNewOption] = useState<string>("");
+type editOptions = (option: Option, value: string) => void;
 
-  const updatedOptionsList: (
-    event: ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => string[] = (event, index) => {
-    const newOptions = props.fields.options.map((option, i) => {
-      if (i === index) {
-        return event.target.value;
+function MultiselectComp(props: Props) {
+  const [options, setOptions] = useState<Option[]>(props.fields.options);
+  const [newOption, setNewOption] = useState<Option>({ id: uuid(), value: "" });
+
+  const editOptions: editOptions = (option, value) => {
+    const updatedOptions: Option[] = options.map((opt: Option) => {
+      if (opt.id === option.id) {
+        return { ...opt, value };
       }
-      return option;
+      return opt;
     });
-    return newOptions;
+    setOptions(updatedOptions);
+    props.optionUpdateCB(props.fields.id, updatedOptions);
+  };
+
+  const deleteOption: (option: Option) => void = (option) => {
+    const newOptions: Option[] = options.filter((opt) => {
+      return option.id !== opt.id;
+    });
+    setOptions(newOptions);
+    props.optionUpdateCB(props.fields.id, newOptions);
   };
 
   return (
@@ -67,32 +74,21 @@ function Otherfields(props: Props) {
         <p>Options</p>
         {options.map((option, index) => {
           return (
-            <div
-              className="flex gap-2 items-center my-2"
-              key={`${props.fields.kind}- ${index}`}
-            >
+            <div key={`${option.id}`} className="flex gap-2 items-center my-2">
               <input
                 className="border border-gray-200 rounded-lg p-2 flex-1"
                 type="text"
                 name={`${props.fields.kind}- ${index}`}
                 id={`${props.fields.kind}- ${index}`}
-                value={option}
+                value={option.value}
                 onChange={(event) => {
-                  const updatedOptions = updatedOptionsList(event, index);
-                  setOptions(updatedOptions);
-                  props.optionChangeCB(props.fields.id, updatedOptions);
+                  editOptions(option, event.target.value);
                 }}
               />
               <button
                 onClick={(event) => {
                   event.preventDefault();
-                  const newOptions = props.fields.options.filter(
-                    (option, i) => {
-                      return i !== index ? option : null;
-                    }
-                  );
-                  setOptions(newOptions);
-                  props.deleteOptionCB(props.fields.id, newOptions);
+                  deleteOption(option);
                 }}
                 className="px-2 py-2 border rounded-md "
               >
@@ -118,11 +114,14 @@ function Otherfields(props: Props) {
       <div className="mt-2 flex gap-2 ml-4">
         <input
           className="w-11/12 border border-gray-200 rounded-lg p-2 flex-1"
-          value={newOption}
+          value={newOption?.value}
           type="text"
           placeholder="Add new option"
           onChange={(event) => {
-            setNewOption(event.target.value);
+            setNewOption({
+              id: uuid(),
+              value: event.target.value,
+            });
           }}
         />
         <button
@@ -130,8 +129,8 @@ function Otherfields(props: Props) {
             event.preventDefault();
             const updatedOptions = [...options, newOption];
             setOptions(updatedOptions);
-            props.addOptionCB(props.fields.id, updatedOptions);
-            setNewOption("");
+            props.optionUpdateCB(props.fields.id, updatedOptions);
+            setNewOption({ id: uuid(), value: "" });
           }}
           className="bg-blue-500 text-white px-2 py-2 border rounded-md"
         >
@@ -155,4 +154,4 @@ function Otherfields(props: Props) {
   );
 }
 
-export default Otherfields;
+export default MultiselectComp;

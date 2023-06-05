@@ -1,6 +1,5 @@
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 
-
 import Formfield from "./Formfield";
 import {
   FormData,
@@ -11,9 +10,12 @@ import {
 } from "../types/formTypes";
 
 import { Link, navigate } from "raviger";
+import { v4 as uuidv4 } from "uuid";
 
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 import Otherfields from "./Otherfields";
+import MultiselectComp from "./MultiselectComp";
+import { Option } from "../types/formTypes";
 
 // To save the form data in local storage
 const saveFormData = (currentData: FormData) => {
@@ -142,23 +144,7 @@ function Form(props: { selectedFormID: number }) {
           return {
             ...field,
             options,
-          };
-        }
-        return field;
-      }),
-    });
-  };
-
-  // Change options value for dropdown field
-  const optionChangeCB = (id: number, options: string[]) => {
-    setFields({
-      ...fields,
-      formFields: fields.formFields.map((field: FormField) => {
-        if (field.id === id) {
-          return {
-            ...field,
-            options,
-          };
+          } as FormField;
         }
         return field;
       }),
@@ -174,25 +160,16 @@ function Form(props: { selectedFormID: number }) {
           return {
             ...field,
             options,
-          };
+          } as FormField;
         }
         return field;
       }),
     });
   };
 
-  // const addMultiSelectOption = (id: number, options: string[]) => {
-
-  // }
-
-  // To add the new field
   const addField = (event: FormEvent) => {
     event.preventDefault();
-    if (
-      fieldType === "dropdown" ||
-      fieldType === "radio" ||
-      fieldType === "checkbox"
-    ) {
+    if (fieldType === "dropdown" || fieldType === "radio") {
       setFields({
         ...fields,
         formFields: [
@@ -202,7 +179,7 @@ function Form(props: { selectedFormID: number }) {
             id: Number(new Date()),
             label: newField,
             value: "",
-            options: [],
+            options: ["Option 1", "Option 2", "Option 3"],
           },
         ],
       });
@@ -220,7 +197,7 @@ function Form(props: { selectedFormID: number }) {
           },
         ],
       });
-    } else if (fieldType === "multiselectdrop") {
+    } else if (fieldType === "checkbox" || fieldType === "multiselectdrop") {
       setFields({
         ...fields,
         formFields: [
@@ -230,11 +207,35 @@ function Form(props: { selectedFormID: number }) {
             id: Number(new Date()),
             label: newField,
             value: [],
-            options: [],
+            options: [
+              { id: uuidv4(), value: "High" },
+              { id: uuidv4(), value: "Low" },
+              { id: uuidv4(), value: "Medium" },
+            ],
           },
         ],
       });
-    } else {
+    }
+    // else if (fieldType === "multiselectdrop") {
+    //   setFields({
+    //     ...fields,
+    //     formFields: [
+    //       ...fields.formFields,
+    //       {
+    //         kind: fieldType,
+    //         id: Number(new Date()),
+    //         label: newField,
+    //         value: [],
+    //         options: [
+    //           { id: uuidv4(), value: "High" },
+    //           { id: uuidv4(), value: "Low" },
+    //           { id: uuidv4(), value: "Medium" },
+    //         ],
+    //       },
+    //     ],
+    //   });
+    // }
+    else {
       setFields({
         ...fields,
         formFields: [
@@ -263,6 +264,40 @@ function Form(props: { selectedFormID: number }) {
     });
   };
 
+  // Change options value for dropdown field
+  const optionChangeCB = (id: number, options: string[]) => {
+    setFields({
+      ...fields,
+      formFields: fields.formFields.map((field: FormField) => {
+        if (field.id === id) {
+          return {
+            ...field,
+            options,
+          } as FormField;
+        }
+        return field;
+      }),
+    });
+  };
+
+  const multiselectOptionUpdateCB: (id: number, options: Option[]) => void = (
+    id,
+    options
+  ) => {
+    setFields({
+      ...fields,
+      formFields: fields.formFields.map((field: FormField) => {
+        if (field.id === id) {
+          return {
+            ...field,
+            options,
+          } as FormField;
+        }
+        return field;
+      }),
+    });
+  };
+
   return (
     <div className="divide-y divide-dotted">
       <input
@@ -287,6 +322,19 @@ function Form(props: { selectedFormID: number }) {
                   onChangeCB={onChangeCB}
                   removeFieldCB={removeField}
                   fields={fields}
+                />
+              );
+            } else if (
+              fields.kind === "multiselectdrop" ||
+              fields.kind === "checkbox"
+            ) {
+              return (
+                <MultiselectComp
+                  key={fields.id}
+                  onChangeCB={onChangeCB}
+                  removeFieldCB={removeField}
+                  fields={fields}
+                  optionUpdateCB={multiselectOptionUpdateCB}
                 />
               );
             } else {

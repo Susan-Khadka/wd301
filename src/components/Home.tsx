@@ -3,6 +3,7 @@ import FormCard from "./FormCard";
 import { FormData, FormField } from "../types/formTypes";
 import { navigate, useQueryParams } from "raviger";
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
+import { v4 as uuidv4 } from "uuid";
 
 // Initial form fields for a form
 const initialFormFields: FormField[] = [
@@ -25,8 +26,12 @@ const initialFormFields: FormField[] = [
   {
     id: 5,
     label: "Priority",
-    options: ["High", "Low", "Medium"],
-    value: "",
+    options: [
+      { id: uuidv4(), value: "High" },
+      { id: uuidv4(), value: "Low" },
+      { id: uuidv4(), value: "Medium" },
+    ],
+    value: [],
     kind: "checkbox",
   },
 ];
@@ -116,3 +121,4 @@ function Home() {
 }
 
 export default Home;
+

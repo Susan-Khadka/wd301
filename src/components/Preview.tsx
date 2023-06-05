@@ -3,6 +3,14 @@ import { FormData, FormField } from "../types/formTypes";
 import { navigate } from "raviger";
 
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
+import Multiselect from "multiselect-react-dropdown";
+
+// type Option = {
+//   id:number;
+//   value: string;
+// };
+
+import { Option } from "../types/formTypes";
 
 const currentForm: (id: number) => FormData = (id: number) => {
   const allLocalForms = getLocalForms();
@@ -54,60 +62,47 @@ function Preview(props: { formId: number }) {
     setCurrentIndex(currentIndex + 1);
   };
 
-  // Need to split this function into two functions
-  const handleChanges = (id: number, value: string) => {
-    if (currentField.kind === "checkbox") {
-      if (currentField.value.includes(value)) {
-        // let updatedFormFields: FormField[];
-        const valuesArray = currentField.value.split(" ");
-        const updatedArray = valuesArray.filter(
-          (currentValue) => currentValue !== value
-        );
-        setCurrentField({
-          ...currentField,
-          value: `${updatedArray.join(" ")}`,
-        });
-        let updatedFormFields = form.formFields.map((field) => {
-          return id === field.id
-            ? { ...field, value: `${updatedArray.join(" ")}` }
-            : field;
-        });
-        setForm({ ...form, formFields: updatedFormFields as FormField[] });
-      } else {
-        if (currentField.value.length === 0) {
-          setCurrentField({
-            ...currentField,
-            value,
-          });
-          const updatedFormFields = form.formFields.map(
-            (field) => {
-              return id === field.id ? { ...field, value } : field;
-            }
-          );
-          setForm({ ...form, formFields: updatedFormFields as FormField[] });
-        } else {
-          setCurrentField({
-            ...currentField,
-            value: `${currentField.value} ${value}`,
-          });
-          const updatedFormFields= form.formFields.map(
-            (field) => {
-              return id === field.id
-                ? { ...field, value: `${currentField.value} ${value}` }
-                : field;
-            }
-          );
-          setForm({ ...form, formFields: updatedFormFields as FormField[] });
-        }
-      }
-      console.log(currentField);
-    } else if(currentField.kind !== "multiselectdrop") {
+  const updateHandleChanges = (id: number, value: string) => {
+    if (
+      currentField.kind !== "multiselectdrop" &&
+      currentField.kind !== "checkbox"
+    ) {
       setCurrentField({ ...currentField, value });
       const updatedFormFields = form.formFields.map((field) => {
         return id === field.id ? { ...field, value } : field;
       });
       setForm({ ...form, formFields: updatedFormFields as FormField[] });
     }
+  };
+
+  const multiSelectUpdate = (selectedList: Option[]) => {
+    const updatedFormFields = form.formFields.map((field) => {
+      return field.id === currentField.id
+        ? { ...field, value: selectedList }
+        : field;
+    });
+    setForm({ ...form, formFields: updatedFormFields as FormField[] });
+  };
+
+  const checkBoxUpdate = (updatedValues: Option[]) => {
+    const updatedFormFields = form.formFields.map((field) => {
+      return field.id === currentField.id
+        ? { ...field, value: updatedValues }
+        : field;
+    });
+    setForm({ ...form, formFields: updatedFormFields as FormField[] });
+  };
+
+  const handleChecked: (option: Option) => boolean = (option) => {
+    while (typeof currentField.value !== "string") {
+      for (let i = 0; i < currentField.value.length; i++) {
+        if (currentField.value[i].id === option.id) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return false;
   };
 
   const handleSubmit = (e: MouseEvent) => {
@@ -127,13 +122,14 @@ function Preview(props: { formId: number }) {
       ) : (
         <>
           <p className="text-2xl text-center my-4">{form.title}</p>
-          <label className="block" htmlFor={currentField.label}>
+          <label className="block text-xl" htmlFor={currentField.label}>
             {currentField.label}
           </label>
+          {/* For text */}
           {currentField.kind === "text" && (
             <input
               onChange={(e) => {
-                handleChanges(currentField.id, e.target.value);
+                updateHandleChanges(currentField.id, e.target.value);
               }}
               name={currentField.label}
               value={currentField.value}
@@ -141,13 +137,25 @@ function Preview(props: { formId: number }) {
               type={currentField.type}
             />
           )}
+          {/* For multiselect dropdown */}
+          {currentField.kind === "multiselectdrop" && (
+            <div className="text-lg mb-5">
+              <Multiselect
+                options={currentField.options}
+                displayValue="value"
+                onSelect={multiSelectUpdate}
+                onRemove={multiSelectUpdate}
+                selectedValues={currentField.value}
+              />
+            </div>
+          )}
+          {/* For dropdown */}
           {currentField.kind === "dropdown" && (
-            <div>
-              {/* Need to add dropdown here  */}
+            <div className="mb-5">
               <select
                 defaultValue={currentField.value}
                 onChange={(e) => {
-                  handleChanges(currentField.id, e.target.value);
+                  updateHandleChanges(currentField.id, e.target.value);
                 }}
                 className="border w-full border-gray-200 rounded-lg py-3 px-2 mt-2 mb-4 flex-1"
               >
@@ -161,7 +169,8 @@ function Preview(props: { formId: number }) {
               </select>
             </div>
           )}
-          {(currentField.kind === "radio" || currentField.kind === "checkbox") && (
+          {/* For radio */}
+          {currentField.kind === "radio" && (
             <div className="mb-5">
               {currentField.options?.map((option, index) => {
                 return (
@@ -171,37 +180,11 @@ function Preview(props: { formId: number }) {
                   >
                     <input
                       onChange={(e) => {
-                        handleChanges(currentField.id, e.target.value);
+                        updateHandleChanges(currentField.id, e.target.value);
                       }}
                       type={currentField.kind}
                       id={`${currentField.label}-${index}`}
                       name={currentField.label}
-                      value={option}
-                      checked={currentField.value === option}
-                    />
-                    <label htmlFor={`${currentField.label}-${index}`}>
-                      {option}
-                    </label>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {/* {currentField.kind === "checkbox" && (
-            <div className="mb-5">
-              {currentField.options?.map((option, index) => {
-                return (
-                  <div
-                    className="flex gap-x-3"
-                    key={`${currentField.kind}-${index}`}
-                  >
-                    <input
-                      onChange={(e) => {
-                        handleChanges(currentField.id, e.target.value);
-                      }}
-                      type="checkbox"
-                      id={`${currentField.label}-${index}`}
-                      name={`${currentField.label}-${index}`}
                       value={option}
                       checked={currentField.value.includes(option)}
                     />
@@ -212,12 +195,62 @@ function Preview(props: { formId: number }) {
                 );
               })}
             </div>
-          )} */}
+          )}
+          {/* For checkbox */}
+          {currentField.kind === "checkbox" && (
+            <div>
+              {currentField.options?.map((option, index) => {
+                return (
+                  <div
+                    className="flex gap-x-2"
+                    key={`${currentField.kind}-${index}`}
+                  >
+                    <input
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          console.log(e.target.checked);
+                          const updatedValues = [...currentField.value, option];
+                          checkBoxUpdate(updatedValues);
+                          setCurrentField({
+                            ...currentField,
+                            value: updatedValues,
+                          });
+                          console.log(updatedValues);
+                        } else {
+                          console.log(e.target.checked);
+                          const updatedValues = currentField.value.filter(
+                            (val) => val.id !== option.id
+                          );
+                          checkBoxUpdate(updatedValues);
+
+                          console.log(updatedValues);
+                          setCurrentField({
+                            ...currentField,
+                            value: updatedValues,
+                          });
+                          console.log(updatedValues);
+                        }
+                      }}
+                      type={currentField.kind}
+                      id={`${currentField.label}-${index}`}
+                      name={currentField.label}
+                      value={option.value}
+                      checked={handleChecked(option)}
+                    />
+                    <label htmlFor={`${currentField.label}-${index}`}>
+                      {option.value}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {/* For textarea */}
           {currentField.kind === "textarea" && (
             <div className="mb-5">
               <textarea
                 onChange={(e) => {
-                  handleChanges(currentField.id, e.target.value);
+                  updateHandleChanges(currentField.id, e.target.value);
                 }}
                 className="border mt-2 p-2 rounded-md w-full resize-none"
                 rows={5}
@@ -226,6 +259,7 @@ function Preview(props: { formId: number }) {
               />
             </div>
           )}
+          {/* Bottom section */}
           <div className="flex justify-between">
             <div className="w-full">
               {currentIndex > 0 && (
