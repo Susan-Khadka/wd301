@@ -5,11 +5,6 @@ import { navigate } from "raviger";
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 import Multiselect from "multiselect-react-dropdown";
 
-// type Option = {
-//   id:number;
-//   value: string;
-// };
-
 import { Option } from "../types/formTypes";
 
 const currentForm: (id: number) => FormData = (id: number) => {

@@ -10,7 +10,7 @@ type Props = {
   addOptionCB: (id: number, options: string[]) => void;
 }
 
-function Otherfields(props: Props) {
+function Singleselectfields(props: Props) {
   const [options, setOptions] = useState<string[]>(props.fields.options);
   const [newOption, setNewOption] = useState<string>("");
 
@@ -155,4 +155,4 @@ function Otherfields(props: Props) {
   );
 }
 
-export default Otherfields;
+export default Singleselectfields;

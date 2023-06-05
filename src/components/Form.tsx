@@ -13,7 +13,7 @@ import { Link, navigate } from "raviger";
 import { v4 as uuidv4 } from "uuid";
 
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
-import Otherfields from "./Otherfields";
+import Singleselectfields from "./Singleselectfields";
 import MultiselectComp from "./MultiselectComp";
 import { Option } from "../types/formTypes";
 
@@ -31,38 +31,6 @@ const findSelectedForm = (id: number) => {
   const localForms = getLocalForms();
   return localForms.find((form: FormData) => form.id === id);
 };
-
-const previewSection = (fields: FormData) => (
-  <div className="flex items-center gap-2">
-    <input
-      onChange={(event) => {}}
-      value={`http://localhost:3000/preview/${fields.id}`}
-      className="border border-gray-200 bg-gray-50 rounded-lg p-2 mt-2 mb-4 flex-1"
-      type={"text"}
-    />
-    <Link
-      type="button"
-      href={`/preview/${fields.id}`}
-      className="px-2 py-2 border flex mb-2 justify-center rounded-md bg-blue-500 text-white"
-      target="_blank"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth="1.5"
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-        />
-      </svg>
-    </Link>
-  </div>
-);
 
 function Form(props: { selectedFormID: number }) {
   const initialState: () => FormData = () => {
@@ -119,7 +87,7 @@ function Form(props: { selectedFormID: number }) {
     };
   }, [fields]);
 
-  // To update the value of any field
+  // To update the value of any field title/label
   const onChangeCB = (id: number, label: string) => {
     setFields({
       ...fields,
@@ -167,91 +135,89 @@ function Form(props: { selectedFormID: number }) {
     });
   };
 
+  // Add a new field
   const addField = (event: FormEvent) => {
     event.preventDefault();
     if (fieldType === "dropdown" || fieldType === "radio") {
-      setFields({
-        ...fields,
-        formFields: [
-          ...fields.formFields,
-          {
-            kind: fieldType,
-            id: Number(new Date()),
-            label: newField,
-            value: "",
-            options: ["Option 1", "Option 2", "Option 3"],
-          },
-        ],
-      });
+      singleSelectField(event);
     } else if (fieldType === "textarea") {
-      setFields({
-        ...fields,
-        formFields: [
-          ...fields.formFields,
-          {
-            kind: fieldType,
-            id: Number(new Date()),
-            label: newField,
-            value: "",
-            type: fieldType,
-          },
-        ],
-      });
+      addTextAreaField(event);
     } else if (fieldType === "checkbox" || fieldType === "multiselectdrop") {
-      setFields({
-        ...fields,
-        formFields: [
-          ...fields.formFields,
-          {
-            kind: fieldType,
-            id: Number(new Date()),
-            label: newField,
-            value: [],
-            options: [
-              { id: uuidv4(), value: "High" },
-              { id: uuidv4(), value: "Low" },
-              { id: uuidv4(), value: "Medium" },
-            ],
-          },
-        ],
-      });
-    }
-    // else if (fieldType === "multiselectdrop") {
-    //   setFields({
-    //     ...fields,
-    //     formFields: [
-    //       ...fields.formFields,
-    //       {
-    //         kind: fieldType,
-    //         id: Number(new Date()),
-    //         label: newField,
-    //         value: [],
-    //         options: [
-    //           { id: uuidv4(), value: "High" },
-    //           { id: uuidv4(), value: "Low" },
-    //           { id: uuidv4(), value: "Medium" },
-    //         ],
-    //       },
-    //     ],
-    //   });
-    // }
-    else {
-      setFields({
-        ...fields,
-        formFields: [
-          ...fields.formFields,
-          {
-            kind: "text",
-            id: Number(new Date()),
-            label: newField,
-            type: fieldType,
-            value: "",
-          },
-        ],
-      });
+      addMultiSelectField(event);
+    } else {
+      addTextField(event);
     }
     setNewField("");
     setFieldType("text");
+  };
+
+  // To add a new field of type checkbox or multiselectdrop
+  const addMultiSelectField = (event: FormEvent) => {
+    setFields({
+      ...fields,
+      formFields: [
+        ...fields.formFields,
+        {
+          kind: fieldType,
+          id: Number(new Date()),
+          label: newField,
+          value: [],
+          options: [
+            { id: uuidv4(), value: "High" },
+            { id: uuidv4(), value: "Low" },
+            { id: uuidv4(), value: "Medium" },
+          ],
+        },
+      ] as FormField[],
+    });
+  };
+
+  const addTextField = (event: FormEvent) => {
+    setFields({
+      ...fields,
+      formFields: [
+        ...fields.formFields,
+        {
+          kind: "text",
+          id: Number(new Date()),
+          label: newField,
+          type: fieldType,
+          value: "",
+        },
+      ] as FormField[],
+    });
+  };
+
+  const addTextAreaField = (event: FormEvent) => {
+    setFields({
+      ...fields,
+      formFields: [
+        ...fields.formFields,
+        {
+          kind: fieldType,
+          id: Number(new Date()),
+          label: newField,
+          value: "",
+          type: fieldType,
+        },
+      ] as FormField[],
+    });
+  };
+
+  const singleSelectField = (event: FormEvent) => {
+    setFields({
+      ...fields,
+      formFields: [
+        ...fields.formFields,
+        {
+          kind: fieldType,
+          id: Number(new Date()),
+          label: newField,
+          value: "",
+          options: ["Option 1", "Option 2", "Option 3"],
+        } as FormField,
+      ],
+    });
   };
 
   // To remove any field
@@ -280,6 +246,7 @@ function Form(props: { selectedFormID: number }) {
     });
   };
 
+  // Change options value for multiselect field
   const multiselectOptionUpdateCB: (id: number, options: Option[]) => void = (
     id,
     options
@@ -339,7 +306,7 @@ function Form(props: { selectedFormID: number }) {
               );
             } else {
               return (
-                <Otherfields
+                <Singleselectfields
                   key={fields.id}
                   onChangeCB={onChangeCB}
                   removeFieldCB={removeField}
@@ -425,5 +392,37 @@ function Form(props: { selectedFormID: number }) {
     </div>
   );
 }
+
+const previewSection = (fields: FormData) => (
+  <div className="flex items-center gap-2">
+    <input
+      value={`http://localhost:3000/preview/${fields.id}`}
+      className="border border-gray-200 bg-gray-50 rounded-lg p-2 mt-2 mb-4 flex-1"
+      type={"text"}
+      disabled
+    />
+    <Link
+      type="button"
+      href={`/preview/${fields.id}`}
+      className="px-2 py-2 border flex mb-2 justify-center rounded-md bg-blue-500 text-white"
+      target="_blank"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="currentColor"
+        className="w-6 h-6"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+        />
+      </svg>
+    </Link>
+  </div>
+);
 
 export default Form;
