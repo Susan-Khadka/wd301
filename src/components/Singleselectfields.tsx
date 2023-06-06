@@ -6,8 +6,6 @@ type Props = {
   onChangeCB: (id: string, label: string) => void;
   removeFieldCB: (id: string) => void;
   updateOptionCB: (id: string, options: string[]) => void;
-  // deleteOptionCB: (id: string, options: string[]) => void;
-  // addOptionCB: (id: string, options: string[]) => void;
 };
 
 function Singleselectfields(props: Props) {

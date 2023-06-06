@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 
 import Formfield from "./Formfield";
 import {
@@ -67,9 +67,9 @@ type MultiSelectUpdate = {
 };
 
 type FormAction =
+  | UpdateTitleAction
   | AddAction
   | RemoveAction
-  | UpdateTitleAction
   | UpdateLabelAction
   | UpdateOptionsAction
   | MultiSelectUpdate;
@@ -144,7 +144,8 @@ function Form(props: { selectedFormID: string }) {
     return findSelectedForm(props.selectedFormID) || localForms[0];
   };
 
-  const [state, setState] = useState(() => initialState());
+  const [state, dispatch] = useReducer(reducer, null, () => initialState());
+  console.log(state);
 
   const [newField, setNewField] = useState("");
   const [kind, setKind] = useState<fieldKind>("text");
@@ -178,16 +179,12 @@ function Form(props: { selectedFormID: string }) {
     };
   }, [state]);
 
-  const dispatchAction = (action: FormAction) => {
-    setState((prevState: FormData) => reducer(prevState, action));
-  };
-
   return (
     <div className="divide-y divide-dotted">
       <input
         value={state.title}
         onChange={(event) =>
-          dispatchAction({
+          dispatch({
             type: "UPDATE_TITLE",
             id: state.id,
             title: event.target.value,
@@ -205,11 +202,9 @@ function Form(props: { selectedFormID: string }) {
                 <Formfield
                   key={fields.id}
                   onChangeCB={(id, label) => {
-                    dispatchAction({ type: "UPDATE_LABEL", id, label });
+                    dispatch({ type: "UPDATE_LABEL", id, label });
                   }}
-                  removeFieldCB={(id) =>
-                    dispatchAction({ type: "REMOVE_FIELD", id })
-                  }
+                  removeFieldCB={(id) => dispatch({ type: "REMOVE_FIELD", id })}
                   fields={fields}
                 />
               );
@@ -221,14 +216,12 @@ function Form(props: { selectedFormID: string }) {
                 <MultiselectComp
                   key={fields.id}
                   onChangeCB={(id, label) => {
-                    dispatchAction({ type: "UPDATE_LABEL", id, label });
+                    dispatch({ type: "UPDATE_LABEL", id, label });
                   }}
-                  removeFieldCB={(id) =>
-                    dispatchAction({ type: "REMOVE_FIELD", id })
-                  }
+                  removeFieldCB={(id) => dispatch({ type: "REMOVE_FIELD", id })}
                   fields={fields}
                   optionUpdateCB={(id, options) => {
-                    dispatchAction({ type: "MULTI_OPT_UPDATE", id, options });
+                    dispatch({ type: "MULTI_OPT_UPDATE", id, options });
                   }}
                 />
               );
@@ -237,14 +230,12 @@ function Form(props: { selectedFormID: string }) {
                 <Singleselectfields
                   key={fields.id}
                   onChangeCB={(id, label) => {
-                    dispatchAction({ type: "UPDATE_LABEL", id, label });
+                    dispatch({ type: "UPDATE_LABEL", id, label });
                   }}
-                  removeFieldCB={(id) =>
-                    dispatchAction({ type: "REMOVE_FIELD", id })
-                  }
+                  removeFieldCB={(id) => dispatch({ type: "REMOVE_FIELD", id })}
                   fields={fields}
                   updateOptionCB={(id, options) => {
-                    dispatchAction({ type: "UPDATE_OPTIONS", id, options });
+                    dispatch({ type: "UPDATE_OPTIONS", id, options });
                   }}
                 />
               );
@@ -283,7 +274,7 @@ function Form(props: { selectedFormID: string }) {
             </select>
             <button
               onClick={(_) => {
-                dispatchAction({
+                dispatch({
                   type: "ADD_FIELD",
                   kind,
                   label: newField,

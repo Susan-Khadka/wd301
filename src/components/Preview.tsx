@@ -27,33 +27,35 @@ const savetoLocalForms = (localForms: FormData[]) => {
   saveLocalForms(updatedLocalForms);
 };
 
+// const reducer = ()=>{
+// }
+
 function Preview(props: { formId: string }) {
-  //   currentForm(props.formId);
-  const [form, setForm] = useState<FormData>(currentForm(props.formId));
+  const [state, setState] = useState<FormData>(currentForm(props.formId));
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [currentField, setCurrentField] = useState(
-    form.formFields[currentIndex]
+    state.formFields[currentIndex]
   );
   const [submitStatus, setSubmitStatus] = useState(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      savetoLocalForms([form]);
+      savetoLocalForms([state]);
     }, 1000);
     return () => {
       clearTimeout(timeout);
     };
-  }, [form]);
+  }, [state]);
 
   const handlePrevious: (e: MouseEvent) => void = (e: MouseEvent) => {
     e.preventDefault();
-    setCurrentField(form.formFields?.[currentIndex - 1]);
+    setCurrentField(state.formFields?.[currentIndex - 1]);
     setCurrentIndex(currentIndex - 1);
   };
 
   const handleNext: (e: MouseEvent) => void = (e: MouseEvent) => {
     e.preventDefault();
-    setCurrentField(form.formFields?.[currentIndex + 1]);
+    setCurrentField(state.formFields?.[currentIndex + 1]);
     setCurrentIndex(currentIndex + 1);
   };
 
@@ -63,29 +65,29 @@ function Preview(props: { formId: string }) {
       currentField.kind !== "checkbox"
     ) {
       setCurrentField({ ...currentField, value });
-      const updatedFormFields = form.formFields.map((field) => {
+      const updatedFormFields = state.formFields.map((field) => {
         return id === field.id ? { ...field, value } : field;
       });
-      setForm({ ...form, formFields: updatedFormFields as FormField[] });
+      setState({ ...state, formFields: updatedFormFields as FormField[] });
     }
   };
 
   const multiSelectUpdate = (selectedList: Option[]) => {
-    const updatedFormFields = form.formFields.map((field) => {
+    const updatedFormFields = state.formFields.map((field) => {
       return field.id === currentField.id
         ? { ...field, value: selectedList }
         : field;
     });
-    setForm({ ...form, formFields: updatedFormFields as FormField[] });
+    setState({ ...state, formFields: updatedFormFields as FormField[] });
   };
 
   const checkBoxUpdate = (updatedValues: Option[]) => {
-    const updatedFormFields = form.formFields.map((field) => {
+    const updatedFormFields = state.formFields.map((field) => {
       return field.id === currentField.id
         ? { ...field, value: updatedValues }
         : field;
     });
-    setForm({ ...form, formFields: updatedFormFields as FormField[] });
+    setState({ ...state, formFields: updatedFormFields as FormField[] });
   };
 
   const handleChecked: (option: Option) => boolean = (option) => {
@@ -102,7 +104,7 @@ function Preview(props: { formId: string }) {
 
   const handleSubmit = (e: MouseEvent) => {
     e.preventDefault();
-    savetoLocalForms([form]);
+    savetoLocalForms([state]);
     setSubmitStatus(true);
   };
 
@@ -116,7 +118,7 @@ function Preview(props: { formId: string }) {
         </div>
       ) : (
         <>
-          <p className="text-2xl text-center my-4">{form.title}</p>
+          <p className="text-2xl text-center my-4">{state.title}</p>
           <label className="block text-xl" htmlFor={currentField.label}>
             {currentField.label}
           </label>
@@ -268,7 +270,7 @@ function Preview(props: { formId: string }) {
                 </button>
               )}
             </div>
-            {currentIndex < form.formFields.length - 1 && (
+            {currentIndex < state.formFields.length - 1 && (
               <button
                 onClick={(e) => {
                   handleNext(e);
@@ -278,7 +280,7 @@ function Preview(props: { formId: string }) {
                 Next
               </button>
             )}
-            {currentIndex === form.formFields.length - 1 && (
+            {currentIndex === state.formFields.length - 1 && (
               <button
                 onClick={(e) => {
                   handleSubmit(e);
