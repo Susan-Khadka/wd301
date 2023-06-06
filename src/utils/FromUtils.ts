@@ -16,6 +16,7 @@ const otherFields: otherFieldTypes[] = [
     "textarea",
     "multiselectdrop",
 ];
+
 export const allFields: allFieldTypes[] = [...textFields, ...otherFields];
 
 export const getNewField = (kind: fieldKind, label: string) => {
@@ -78,8 +79,6 @@ export const getNewField = (kind: fieldKind, label: string) => {
             } as FormField;
     }
 };
-
-
 
 export const updateKind: (type: allFieldTypes) => fieldKind = (
     type: allFieldTypes

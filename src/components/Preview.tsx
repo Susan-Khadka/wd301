@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent, useEffect } from "react";
+import React, { useState, MouseEvent, useEffect, useReducer } from "react";
 import { FormData, FormField } from "../types/formTypes";
 import { navigate } from "raviger";
 
@@ -27,11 +27,73 @@ const savetoLocalForms = (localForms: FormData[]) => {
   saveLocalForms(updatedLocalForms);
 };
 
-// const reducer = ()=>{
-// }
+// const checkBoxUpdate = (updatedValues: Option[]) => {
+//   const updatedFormFields = state.formFields.map((field) => {
+//     return field.id === currentField.id
+//       ? { ...field, value: updatedValues }
+//       : field;
+//   });
+//   setState({ ...state, formFields: updatedFormFields as FormField[] });
+// };
+
+type SingleValueAction = {
+  type: "SINGLE_SELECT";
+  id: string;
+  value: string;
+  callback: () => void;
+};
+
+type MultiDropDown = {
+  type: "MULTI_DROPDOWN";
+  id: string;
+  value: Option[];
+};
+
+type ChecboxValueAction = {
+  type: "MULTI_CHECKBOX";
+  id: string;
+  value: Option[];
+  callback: () => void;
+};
+
+type MultiValueSelectAction = MultiDropDown | ChecboxValueAction;
+
+type updateValueAction = SingleValueAction | MultiValueSelectAction;
+
+const reducer = (state: FormData, action: updateValueAction) => {
+  switch (action.type) {
+    case "SINGLE_SELECT": {
+      const updatedFormFields = state.formFields.map((field) => {
+        return action.id === field.id
+          ? { ...field, value: action.value }
+          : field;
+      });
+      action.callback();
+      return { ...state, formFields: updatedFormFields as FormField[] };
+    }
+    case "MULTI_DROPDOWN": {
+      const updatedFormFields = state.formFields.map((field) => {
+        return field.id === action.id
+          ? { ...field, value: action.value }
+          : field;
+      });
+      return { ...state, formFields: updatedFormFields as FormField[] };
+    }
+    case "MULTI_CHECKBOX": {
+      const updatedFormFields = state.formFields.map((field) => {
+        return field.id === action.id
+          ? { ...field, value: action.value }
+          : field;
+      });
+      action.callback();
+      return { ...state, formFields: updatedFormFields as FormField[] };
+    }
+  }
+  return state;
+};
 
 function Preview(props: { formId: string }) {
-  const [state, setState] = useState<FormData>(currentForm(props.formId));
+  const [state, dispatch] = useReducer(reducer, currentForm(props.formId));
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [currentField, setCurrentField] = useState(
     state.formFields[currentIndex]
@@ -57,37 +119,6 @@ function Preview(props: { formId: string }) {
     e.preventDefault();
     setCurrentField(state.formFields?.[currentIndex + 1]);
     setCurrentIndex(currentIndex + 1);
-  };
-
-  const updateHandleChanges = (id: string, value: string) => {
-    if (
-      currentField.kind !== "multiselectdrop" &&
-      currentField.kind !== "checkbox"
-    ) {
-      setCurrentField({ ...currentField, value });
-      const updatedFormFields = state.formFields.map((field) => {
-        return id === field.id ? { ...field, value } : field;
-      });
-      setState({ ...state, formFields: updatedFormFields as FormField[] });
-    }
-  };
-
-  const multiSelectUpdate = (selectedList: Option[]) => {
-    const updatedFormFields = state.formFields.map((field) => {
-      return field.id === currentField.id
-        ? { ...field, value: selectedList }
-        : field;
-    });
-    setState({ ...state, formFields: updatedFormFields as FormField[] });
-  };
-
-  const checkBoxUpdate = (updatedValues: Option[]) => {
-    const updatedFormFields = state.formFields.map((field) => {
-      return field.id === currentField.id
-        ? { ...field, value: updatedValues }
-        : field;
-    });
-    setState({ ...state, formFields: updatedFormFields as FormField[] });
   };
 
   const handleChecked: (option: Option) => boolean = (option) => {
@@ -126,7 +157,17 @@ function Preview(props: { formId: string }) {
           {currentField.kind === "text" && (
             <input
               onChange={(e) => {
-                updateHandleChanges(currentField.id, e.target.value);
+                dispatch({
+                  type: "SINGLE_SELECT",
+                  id: currentField.id,
+                  value: e.target.value,
+                  callback: () => {
+                    setCurrentField({
+                      ...currentField,
+                      value: e.target.value,
+                    });
+                  },
+                });
               }}
               name={currentField.label}
               value={currentField.value}
@@ -140,8 +181,20 @@ function Preview(props: { formId: string }) {
               <Multiselect
                 options={currentField.options}
                 displayValue="value"
-                onSelect={multiSelectUpdate}
-                onRemove={multiSelectUpdate}
+                onSelect={(selectedList) => {
+                  dispatch({
+                    type: "MULTI_DROPDOWN",
+                    id: currentField.id,
+                    value: selectedList,
+                  });
+                }}
+                onRemove={(selectedList) => {
+                  dispatch({
+                    type: "MULTI_DROPDOWN",
+                    id: currentField.id,
+                    value: selectedList,
+                  });
+                }}
                 selectedValues={currentField.value}
               />
             </div>
@@ -152,7 +205,17 @@ function Preview(props: { formId: string }) {
               <select
                 defaultValue={currentField.value}
                 onChange={(e) => {
-                  updateHandleChanges(currentField.id, e.target.value);
+                  dispatch({
+                    type: "SINGLE_SELECT",
+                    id: currentField.id,
+                    value: e.target.value,
+                    callback: () => {
+                      setCurrentField({
+                        ...currentField,
+                        value: e.target.value,
+                      });
+                    },
+                  });
                 }}
                 className="border w-full border-gray-200 rounded-lg py-3 px-2 mt-2 mb-4 flex-1"
               >
@@ -177,7 +240,17 @@ function Preview(props: { formId: string }) {
                   >
                     <input
                       onChange={(e) => {
-                        updateHandleChanges(currentField.id, e.target.value);
+                        dispatch({
+                          type: "SINGLE_SELECT",
+                          id: currentField.id,
+                          value: e.target.value,
+                          callback: () => {
+                            setCurrentField({
+                              ...currentField,
+                              value: e.target.value,
+                            });
+                          },
+                        });
                       }}
                       type={currentField.kind}
                       id={`${currentField.label}-${index}`}
@@ -205,27 +278,33 @@ function Preview(props: { formId: string }) {
                     <input
                       onChange={(e) => {
                         if (e.target.checked) {
-                          console.log(e.target.checked);
                           const updatedValues = [...currentField.value, option];
-                          checkBoxUpdate(updatedValues);
-                          setCurrentField({
-                            ...currentField,
+                          dispatch({
+                            type: "MULTI_CHECKBOX",
+                            id: currentField.id,
                             value: updatedValues,
+                            callback: () => {
+                              setCurrentField({
+                                ...currentField,
+                                value: updatedValues,
+                              });
+                            },
                           });
-                          console.log(updatedValues);
                         } else {
-                          console.log(e.target.checked);
                           const updatedValues = currentField.value.filter(
                             (val) => val.id !== option.id
                           );
-                          checkBoxUpdate(updatedValues);
-
-                          console.log(updatedValues);
-                          setCurrentField({
-                            ...currentField,
+                          dispatch({
+                            type: "MULTI_CHECKBOX",
+                            id: currentField.id,
                             value: updatedValues,
+                            callback: () => {
+                              setCurrentField({
+                                ...currentField,
+                                value: updatedValues,
+                              });
+                            },
                           });
-                          console.log(updatedValues);
                         }
                       }}
                       type={currentField.kind}
@@ -247,7 +326,17 @@ function Preview(props: { formId: string }) {
             <div className="mb-5">
               <textarea
                 onChange={(e) => {
-                  updateHandleChanges(currentField.id, e.target.value);
+                  dispatch({
+                    type: "SINGLE_SELECT",
+                    id: currentField.id,
+                    value: e.target.value,
+                    callback: () => {
+                      setCurrentField({
+                        ...currentField,
+                        value: e.target.value,
+                      });
+                    },
+                  });
                 }}
                 className="border mt-2 p-2 rounded-md w-full resize-none"
                 rows={5}
