@@ -10,9 +10,9 @@ const routes = {
   "/": () => <App />,
   "/error": () => <Errorpage />,
   "/about": () => <About />,
-  "/form/:id": ({ id }: { id: string }) => <Form selectedFormID={Number(id)} />,
+  "/form/:id": ({ id }: { id: string }) => <Form selectedFormID={id} />,
   "/preview/:id": ({ id }: { id: string }) => (
-    <Preview formId={Number(id)} />
+    <Preview formId={(id)} />
   ),
 };
 

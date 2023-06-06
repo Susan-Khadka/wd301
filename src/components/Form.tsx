@@ -1,21 +1,20 @@
-import React, { FormEvent, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import Formfield from "./Formfield";
 import {
   FormData,
   FormField,
   allFieldTypes,
-  otherFieldTypes,
-  textFieldTypes,
+  fieldKind,
 } from "../types/formTypes";
 
 import { Link, navigate } from "raviger";
-import { v4 as uuidv4 } from "uuid";
 
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 import Singleselectfields from "./Singleselectfields";
 import MultiselectComp from "./MultiselectComp";
 import { Option } from "../types/formTypes";
+import { allFields, getNewField, updateKind } from "../utils/FromUtils";
 
 // To save the form data in local storage
 const saveFormData = (currentData: FormData) => {
@@ -27,38 +26,130 @@ const saveFormData = (currentData: FormData) => {
 };
 
 // To find the selected form
-const findSelectedForm = (id: number) => {
+const findSelectedForm = (id: string) => {
   const localForms = getLocalForms();
   return localForms.find((form: FormData) => form.id === id);
 };
 
-function Form(props: { selectedFormID: number }) {
+type AddAction = {
+  type: "ADD_FIELD";
+  kind: fieldKind;
+  label: string;
+};
+
+type RemoveAction = {
+  type: "REMOVE_FIELD";
+  id: string;
+};
+
+type UpdateTitleAction = {
+  type: "UPDATE_TITLE";
+  id: string;
+  title: string;
+};
+
+type UpdateLabelAction = {
+  type: "UPDATE_LABEL";
+  id: string;
+  label: string;
+};
+
+type UpdateOptionsAction = {
+  type: "UPDATE_OPTIONS";
+  id: string;
+  options: string[];
+};
+
+type MultiSelectUpdate = {
+  type: "MULTI_OPT_UPDATE";
+  id: string;
+  options: Option[];
+};
+
+type FormAction =
+  | AddAction
+  | RemoveAction
+  | UpdateTitleAction
+  | UpdateLabelAction
+  | UpdateOptionsAction
+  | MultiSelectUpdate;
+
+const reducer = (state: FormData, action: FormAction) => {
+  switch (action.type) {
+    case "ADD_FIELD":
+      const newField = getNewField(action.kind, action.label);
+      if (newField.label.length > 0) {
+        return {
+          ...state,
+          formFields: [...state.formFields, newField],
+        };
+      }
+      return state;
+    case "REMOVE_FIELD":
+      return {
+        ...state,
+        formFields: state.formFields.filter((field) => field.id !== action.id),
+      };
+    case "UPDATE_TITLE":
+      return {
+        ...state,
+        title: action.title,
+      };
+
+    case "UPDATE_LABEL":
+      return {
+        ...state,
+        formFields: state.formFields.map((field: FormField) => {
+          if (field.id === action.id) {
+            return {
+              ...field,
+              label: action.label,
+            };
+          }
+          return field;
+        }),
+      };
+    case "UPDATE_OPTIONS":
+      return {
+        ...state,
+        formFields: state.formFields.map((field: FormField) => {
+          if (field.id === action.id) {
+            return {
+              ...field,
+              options: action.options,
+            } as FormField;
+          }
+          return field;
+        }),
+      };
+    case "MULTI_OPT_UPDATE":
+      return {
+        ...state,
+        formFields: state.formFields.map((field: FormField) => {
+          if (field.id === action.id) {
+            return {
+              ...field,
+              options: action.options,
+            } as FormField;
+          }
+          return field;
+        }),
+      };
+  }
+};
+
+function Form(props: { selectedFormID: string }) {
   const initialState: () => FormData = () => {
     const localForms = getLocalForms();
     return findSelectedForm(props.selectedFormID) || localForms[0];
   };
 
-  const [fields, setFields] = useState(() => initialState());
+  const [state, setState] = useState(() => initialState());
 
   const [newField, setNewField] = useState("");
+  const [kind, setKind] = useState<fieldKind>("text");
   const [fieldType, setFieldType] = useState<allFieldTypes>("text");
   const titleRef = useRef<HTMLInputElement>(null);
-  const textFields: textFieldTypes[] = [
-    "text",
-    "email",
-    "number",
-    "date",
-    "tel",
-    "password",
-  ];
-  const otherFields: otherFieldTypes[] = [
-    "radio",
-    "dropdown",
-    "checkbox",
-    "textarea",
-    "multiselectdrop",
-  ];
-  const allFields: allFieldTypes[] = [...textFields, ...otherFields];
 
   useEffect(() => {
     const oldTitle = document.title;
@@ -71,207 +162,34 @@ function Form(props: { selectedFormID: number }) {
 
   // To check if the selected form is present in local storage
   useEffect(() => {
-    if (props.selectedFormID !== fields.id) {
+    if (props.selectedFormID !== state.id) {
       navigate("/");
     }
-  }, [props.selectedFormID, fields.id]);
+  }, [props.selectedFormID, state.id]);
 
   // Saves the form data in local storage after every 1 second of inactivity
   useEffect(() => {
     const timeout = setTimeout(() => {
-      saveFormData(fields);
+      saveFormData(state);
     }, 1000);
 
     return () => {
       clearTimeout(timeout);
     };
-  }, [fields]);
+  }, [state]);
 
-  // To update the value of any field title/label
-  const onChangeCB = (id: number, label: string) => {
-    setFields({
-      ...fields,
-      formFields: fields.formFields.map((field: FormField) => {
-        if (field.id === id) {
-          return {
-            ...field,
-            label,
-          };
-        }
-        return field;
-      }),
-    });
-  };
-
-  // Add Options for multi option fields
-  const addOptionsCB = (id: number, options: string[]) => {
-    setFields({
-      ...fields,
-      formFields: fields.formFields.map((field: FormField) => {
-        if (field.id === id) {
-          return {
-            ...field,
-            options,
-          } as FormField;
-        }
-        return field;
-      }),
-    });
-  };
-
-  // Delete the option value for dropdown field
-  const deleteOptionCB = (id: number, options: string[]) => {
-    setFields({
-      ...fields,
-      formFields: fields.formFields.map((field: FormField) => {
-        if (field.id === id) {
-          return {
-            ...field,
-            options,
-          } as FormField;
-        }
-        return field;
-      }),
-    });
-  };
-
-  // Add a new field
-  const addField = (event: FormEvent) => {
-    event.preventDefault();
-    if (fieldType === "dropdown" || fieldType === "radio") {
-      singleSelectField(event);
-    } else if (fieldType === "textarea") {
-      addTextAreaField(event);
-    } else if (fieldType === "checkbox" || fieldType === "multiselectdrop") {
-      addMultiSelectField(event);
-    } else {
-      addTextField(event);
-    }
-    setNewField("");
-    setFieldType("text");
-  };
-
-  // To add a new field of type checkbox or multiselectdrop
-  const addMultiSelectField = (event: FormEvent) => {
-    setFields({
-      ...fields,
-      formFields: [
-        ...fields.formFields,
-        {
-          kind: fieldType,
-          id: Number(new Date()),
-          label: newField,
-          value: [],
-          options: [
-            { id: uuidv4(), value: "High" },
-            { id: uuidv4(), value: "Low" },
-            { id: uuidv4(), value: "Medium" },
-          ],
-        },
-      ] as FormField[],
-    });
-  };
-
-  const addTextField = (event: FormEvent) => {
-    setFields({
-      ...fields,
-      formFields: [
-        ...fields.formFields,
-        {
-          kind: "text",
-          id: Number(new Date()),
-          label: newField,
-          type: fieldType,
-          value: "",
-        },
-      ] as FormField[],
-    });
-  };
-
-  const addTextAreaField = (event: FormEvent) => {
-    setFields({
-      ...fields,
-      formFields: [
-        ...fields.formFields,
-        {
-          kind: fieldType,
-          id: Number(new Date()),
-          label: newField,
-          value: "",
-          type: fieldType,
-        },
-      ] as FormField[],
-    });
-  };
-
-  const singleSelectField = (event: FormEvent) => {
-    setFields({
-      ...fields,
-      formFields: [
-        ...fields.formFields,
-        {
-          kind: fieldType,
-          id: Number(new Date()),
-          label: newField,
-          value: "",
-          options: ["Option 1", "Option 2", "Option 3"],
-        } as FormField,
-      ],
-    });
-  };
-
-  // To remove any field
-  const removeField = (id: number) => {
-    setFields({
-      ...fields,
-      formFields: fields.formFields.filter(
-        (field: FormField) => field.id !== id
-      ),
-    });
-  };
-
-  // Change options value for dropdown field
-  const optionChangeCB = (id: number, options: string[]) => {
-    setFields({
-      ...fields,
-      formFields: fields.formFields.map((field: FormField) => {
-        if (field.id === id) {
-          return {
-            ...field,
-            options,
-          } as FormField;
-        }
-        return field;
-      }),
-    });
-  };
-
-  // Change options value for multiselect field
-  const multiselectOptionUpdateCB: (id: number, options: Option[]) => void = (
-    id,
-    options
-  ) => {
-    setFields({
-      ...fields,
-      formFields: fields.formFields.map((field: FormField) => {
-        if (field.id === id) {
-          return {
-            ...field,
-            options,
-          } as FormField;
-        }
-        return field;
-      }),
-    });
+  const dispatchAction = (action: FormAction) => {
+    setState((prevState: FormData) => reducer(prevState, action));
   };
 
   return (
     <div className="divide-y divide-dotted">
       <input
-        value={fields.title}
+        value={state.title}
         onChange={(event) =>
-          setFields({
-            ...fields,
+          dispatchAction({
+            type: "UPDATE_TITLE",
+            id: state.id,
             title: event.target.value,
           })
         }
@@ -281,13 +199,17 @@ function Form(props: { selectedFormID: number }) {
       />
       <div className="">
         <form className="px-2 mt-4">
-          {fields.formFields.map((fields: FormField) => {
+          {state.formFields.map((fields: FormField) => {
             if (fields.kind === "text" || fields.kind === "textarea") {
               return (
                 <Formfield
                   key={fields.id}
-                  onChangeCB={onChangeCB}
-                  removeFieldCB={removeField}
+                  onChangeCB={(id, label) => {
+                    dispatchAction({ type: "UPDATE_LABEL", id, label });
+                  }}
+                  removeFieldCB={(id) =>
+                    dispatchAction({ type: "REMOVE_FIELD", id })
+                  }
                   fields={fields}
                 />
               );
@@ -298,22 +220,32 @@ function Form(props: { selectedFormID: number }) {
               return (
                 <MultiselectComp
                   key={fields.id}
-                  onChangeCB={onChangeCB}
-                  removeFieldCB={removeField}
+                  onChangeCB={(id, label) => {
+                    dispatchAction({ type: "UPDATE_LABEL", id, label });
+                  }}
+                  removeFieldCB={(id) =>
+                    dispatchAction({ type: "REMOVE_FIELD", id })
+                  }
                   fields={fields}
-                  optionUpdateCB={multiselectOptionUpdateCB}
+                  optionUpdateCB={(id, options) => {
+                    dispatchAction({ type: "MULTI_OPT_UPDATE", id, options });
+                  }}
                 />
               );
             } else {
               return (
                 <Singleselectfields
                   key={fields.id}
-                  onChangeCB={onChangeCB}
-                  removeFieldCB={removeField}
+                  onChangeCB={(id, label) => {
+                    dispatchAction({ type: "UPDATE_LABEL", id, label });
+                  }}
+                  removeFieldCB={(id) =>
+                    dispatchAction({ type: "REMOVE_FIELD", id })
+                  }
                   fields={fields}
-                  optionChangeCB={optionChangeCB}
-                  deleteOptionCB={deleteOptionCB}
-                  addOptionCB={addOptionsCB}
+                  updateOptionCB={(id, options) => {
+                    dispatchAction({ type: "UPDATE_OPTIONS", id, options });
+                  }}
                 />
               );
             }
@@ -335,6 +267,7 @@ function Form(props: { selectedFormID: number }) {
               onChange={(event) => {
                 const value = event.target.value as allFieldTypes;
                 setFieldType(value);
+                setKind(updateKind(value));
               }}
               className="p-2 border rounded-md w-11/12"
               name="type"
@@ -349,7 +282,14 @@ function Form(props: { selectedFormID: number }) {
               })}
             </select>
             <button
-              onClick={addField}
+              onClick={(_) => {
+                dispatchAction({
+                  type: "ADD_FIELD",
+                  kind,
+                  label: newField,
+                });
+                setNewField("");
+              }}
               className="px-2 py-2 border flex justify-center rounded-md flex-1 bg-blue-500 text-white"
             >
               <svg
@@ -373,7 +313,7 @@ function Form(props: { selectedFormID: number }) {
       <div className="flex ">
         <button
           onClick={(event) => {
-            saveFormData(fields);
+            saveFormData(state);
           }}
           className="bg-blue-500 text-white rounded-lg px-4 py-2 m-2 text-lg"
         >
@@ -388,7 +328,7 @@ function Form(props: { selectedFormID: number }) {
           Close Form
         </button>
       </div>
-      {previewSection(fields)}
+      {previewSection(state)}
     </div>
   );
 }

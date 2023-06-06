@@ -7,7 +7,7 @@ import Multiselect from "multiselect-react-dropdown";
 
 import { Option } from "../types/formTypes";
 
-const currentForm: (id: number) => FormData = (id: number) => {
+const currentForm: (id: string) => FormData = (id) => {
   const allLocalForms = getLocalForms();
   const selectedForm: FormData | undefined = allLocalForms.find(
     (form: FormData) => form.id === id
@@ -27,7 +27,7 @@ const savetoLocalForms = (localForms: FormData[]) => {
   saveLocalForms(updatedLocalForms);
 };
 
-function Preview(props: { formId: number }) {
+function Preview(props: { formId: string }) {
   //   currentForm(props.formId);
   const [form, setForm] = useState<FormData>(currentForm(props.formId));
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -57,7 +57,7 @@ function Preview(props: { formId: number }) {
     setCurrentIndex(currentIndex + 1);
   };
 
-  const updateHandleChanges = (id: number, value: string) => {
+  const updateHandleChanges = (id: string, value: string) => {
     if (
       currentField.kind !== "multiselectdrop" &&
       currentField.kind !== "checkbox"

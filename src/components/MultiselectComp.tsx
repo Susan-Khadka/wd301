@@ -4,9 +4,9 @@ import { v4 as uuid } from "uuid";
 
 type Props = {
   fields: checkboxField | MultiSelectDrop;
-  onChangeCB: (id: number, value: string) => void;
-  removeFieldCB: (id: number) => void;
-  optionUpdateCB: (id: number, options: Option[]) => void;
+  onChangeCB: (id: string, label: string) => void;
+  removeFieldCB: (id: string) => void;
+  optionUpdateCB: (id: string, options: Option[]) => void;
 };
 
 type editOptions = (option: Option, value: string) => void;

@@ -2,13 +2,13 @@ import React, { ChangeEvent, useState } from "react";
 import { DropdownField, radioField } from "../types/formTypes";
 
 type Props = {
-  fields: DropdownField | radioField   ;
-  onChangeCB: (id: number, value: string) => void;
-  removeFieldCB: (id: number) => void;
-  optionChangeCB: (id: number, options: string[]) => void;
-  deleteOptionCB: (id: number, options: string[]) => void;
-  addOptionCB: (id: number, options: string[]) => void;
-}
+  fields: DropdownField | radioField;
+  onChangeCB: (id: string, label: string) => void;
+  removeFieldCB: (id: string) => void;
+  updateOptionCB: (id: string, options: string[]) => void;
+  // deleteOptionCB: (id: string, options: string[]) => void;
+  // addOptionCB: (id: string, options: string[]) => void;
+};
 
 function Singleselectfields(props: Props) {
   const [options, setOptions] = useState<string[]>(props.fields.options);
@@ -80,7 +80,7 @@ function Singleselectfields(props: Props) {
                 onChange={(event) => {
                   const updatedOptions = updatedOptionsList(event, index);
                   setOptions(updatedOptions);
-                  props.optionChangeCB(props.fields.id, updatedOptions);
+                  props.updateOptionCB(props.fields.id, updatedOptions);
                 }}
               />
               <button
@@ -92,7 +92,7 @@ function Singleselectfields(props: Props) {
                     }
                   );
                   setOptions(newOptions);
-                  props.deleteOptionCB(props.fields.id, newOptions);
+                  props.updateOptionCB(props.fields.id, newOptions);
                 }}
                 className="px-2 py-2 border rounded-md "
               >
@@ -130,7 +130,7 @@ function Singleselectfields(props: Props) {
             event.preventDefault();
             const updatedOptions = [...options, newOption];
             setOptions(updatedOptions);
-            props.addOptionCB(props.fields.id, updatedOptions);
+            props.updateOptionCB(props.fields.id, updatedOptions);
             setNewOption("");
           }}
           className="bg-blue-500 text-white px-2 py-2 border rounded-md"

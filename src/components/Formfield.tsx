@@ -2,8 +2,8 @@ import React from "react";
 import { TextArea, TextField } from "../types/formTypes";
 
 function Formfield(props: {
-  removeFieldCB: (id: number) => void;
-  onChangeCB: (id: number, value: string) => void;
+  removeFieldCB: (id: string) => void;
+  onChangeCB: (id: string, label: string) => void;
   fields: TextField | TextArea;
 }) {
   return (

@@ -7,33 +7,8 @@ import { v4 as uuidv4 } from "uuid";
 
 // Initial form fields for a form
 const initialFormFields: FormField[] = [
-  { id: 1, label: "First Name", type: "text", value: "", kind: "text" },
-  { id: 2, label: "Last Name", type: "text", value: "", kind: "text" },
-  {
-    id: 3,
-    label: "Priority",
-    options: ["High", "Low", "Medium"],
-    value: "",
-    kind: "dropdown",
-  },
-  {
-    id: 4,
-    label: "Priority",
-    options: ["High", "Low", "Medium"],
-    value: "",
-    kind: "radio",
-  },
-  {
-    id: 5,
-    label: "Priority",
-    options: [
-      { id: uuidv4(), value: "High" },
-      { id: uuidv4(), value: "Low" },
-      { id: uuidv4(), value: "Medium" },
-    ],
-    value: [],
-    kind: "checkbox",
-  },
+  { id: uuidv4(), label: "First Name", type: "text", value: "", kind: "text" },
+  { id: uuidv4(), label: "Last Name", type: "text", value: "", kind: "text" },
 ];
 
 function Home() {
@@ -45,7 +20,7 @@ function Home() {
   const addForms = () => {
     const localForms = getLocalForms();
     const newForm = {
-      id: Number(new Date()),
+      id: uuidv4(),
       title: "Untitled Form",
       formFields: initialFormFields,
     };
@@ -56,7 +31,7 @@ function Home() {
   };
 
   // Delete a form
-  const deleteForm = (id: number) => {
+  const deleteForm = (id: string) => {
     const updatedLocalForms = formData.filter(
       (form: FormData) => form.id !== id
     );
@@ -121,4 +96,3 @@ function Home() {
 }
 
 export default Home;
-
