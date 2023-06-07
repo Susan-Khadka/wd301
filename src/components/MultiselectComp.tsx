@@ -74,7 +74,7 @@ function MultiselectComp(props: Props) {
         <p>Options</p>
         {options.map((option, index) => {
           return (
-            <div key={`${option.id}`} className="flex gap-2 items-center my-2">
+            <div key={`${option.id}-${index}`} className="flex gap-2 items-center my-2">
               <input
                 className="border border-gray-200 rounded-lg p-2 flex-1"
                 type="text"

@@ -145,7 +145,6 @@ function Form(props: { selectedFormID: string }) {
   };
 
   const [state, dispatch] = useReducer(reducer, null, () => initialState());
-  console.log(state);
 
   const [newField, setNewField] = useState("");
   const [kind, setKind] = useState<fieldKind>("text");

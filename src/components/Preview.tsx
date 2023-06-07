@@ -7,16 +7,32 @@ import Multiselect from "multiselect-react-dropdown";
 
 import { Option } from "../types/formTypes";
 
-const currentForm: (id: string) => FormData = (id) => {
+type updatedFormData = {
+  id: string;
+  title: string;
+  formFields: FormField[];
+  currentField: FormField;
+  currentIndex: number;
+};
+
+const currentForm: (id: string) => updatedFormData = (id) => {
   const allLocalForms = getLocalForms();
   const selectedForm: FormData | undefined = allLocalForms.find(
     (form: FormData) => form.id === id
   );
   if (selectedForm === undefined) {
     navigate("/error");
-    return allLocalForms[0];
+    return {
+      ...allLocalForms[0],
+      currentField: allLocalForms[0].formFields[0],
+      currentIndex: 0,
+    };
   }
-  return selectedForm;
+  return {
+    ...selectedForm,
+    currentField: selectedForm.formFields[0],
+    currentIndex: 0,
+  };
 };
 
 const savetoLocalForms = (localForms: FormData[]) => {
@@ -26,15 +42,6 @@ const savetoLocalForms = (localForms: FormData[]) => {
   });
   saveLocalForms(updatedLocalForms);
 };
-
-// const checkBoxUpdate = (updatedValues: Option[]) => {
-//   const updatedFormFields = state.formFields.map((field) => {
-//     return field.id === currentField.id
-//       ? { ...field, value: updatedValues }
-//       : field;
-//   });
-//   setState({ ...state, formFields: updatedFormFields as FormField[] });
-// };
 
 type SingleValueAction = {
   type: "SINGLE_SELECT";
@@ -56,11 +63,24 @@ type ChecboxValueAction = {
   callback: () => void;
 };
 
-type MultiValueSelectAction = MultiDropDown | ChecboxValueAction;
+type handleNextAction = {
+  type: "NEXT";
+  callback: () => void;
+};
 
-type updateValueAction = SingleValueAction | MultiValueSelectAction;
+type handlePreviousAction = {
+  type: "PREVIOUS";
+  callback: () => void;
+};
 
-const reducer = (state: FormData, action: updateValueAction) => {
+type valueUpdateAction = SingleValueAction | MultiDropDown | ChecboxValueAction;
+
+type overallActions =
+  | valueUpdateAction
+  | handleNextAction
+  | handlePreviousAction;
+
+const reducer = (state: updatedFormData, action: overallActions) => {
   switch (action.type) {
     case "SINGLE_SELECT": {
       const updatedFormFields = state.formFields.map((field) => {
@@ -88,16 +108,32 @@ const reducer = (state: FormData, action: updateValueAction) => {
       action.callback();
       return { ...state, formFields: updatedFormFields as FormField[] };
     }
+    case "NEXT": {
+      action.callback();
+      return {
+        ...state,
+        currentField: state.formFields[state.currentIndex + 1],
+        currentIndex: state.currentIndex + 1,
+      };
+    }
+    case "PREVIOUS": {
+      action.callback();
+      return {
+        ...state,
+        currentField: state.formFields[state.currentIndex - 1],
+        currentIndex: state.currentIndex - 1,
+      };
+    }
   }
-  return state;
 };
 
 function Preview(props: { formId: string }) {
   const [state, dispatch] = useReducer(reducer, currentForm(props.formId));
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [currentField, setCurrentField] = useState(
-    state.formFields[currentIndex]
+    state.formFields?.[currentIndex]
   );
+
   const [submitStatus, setSubmitStatus] = useState(false);
 
   useEffect(() => {
@@ -108,18 +144,6 @@ function Preview(props: { formId: string }) {
       clearTimeout(timeout);
     };
   }, [state]);
-
-  const handlePrevious: (e: MouseEvent) => void = (e: MouseEvent) => {
-    e.preventDefault();
-    setCurrentField(state.formFields?.[currentIndex - 1]);
-    setCurrentIndex(currentIndex - 1);
-  };
-
-  const handleNext: (e: MouseEvent) => void = (e: MouseEvent) => {
-    e.preventDefault();
-    setCurrentField(state.formFields?.[currentIndex + 1]);
-    setCurrentIndex(currentIndex + 1);
-  };
 
   const handleChecked: (option: Option) => boolean = (option) => {
     while (typeof currentField.value !== "string") {
@@ -351,7 +375,13 @@ function Preview(props: { formId: string }) {
               {currentIndex > 0 && (
                 <button
                   onClick={(e) => {
-                    handlePrevious(e);
+                    dispatch({
+                      type: "PREVIOUS",
+                      callback: () => {
+                        setCurrentField(state.formFields?.[currentIndex - 1]);
+                        setCurrentIndex(currentIndex - 1);
+                      },
+                    });
                   }}
                   className="p-2 border bg-blue-500 text-white rounded-lg"
                 >
@@ -362,7 +392,14 @@ function Preview(props: { formId: string }) {
             {currentIndex < state.formFields.length - 1 && (
               <button
                 onClick={(e) => {
-                  handleNext(e);
+                  dispatch({
+                    type: "NEXT",
+                    callback: () => {
+                      setCurrentField(state.formFields[currentIndex + 1]);
+                      setCurrentIndex(currentIndex + 1);
+                    },
+                  });
+                  // handleNext(e);
                 }}
                 className="p-2 border bg-blue-500 text-white rounded-lg"
               >
