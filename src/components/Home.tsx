@@ -1,43 +1,57 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormCard from "./FormCard";
-import { FormData, FormField } from "../types/formTypes";
+import { FormData, FormField, updateFormData } from "../types/formTypes";
 import { navigate, useQueryParams } from "raviger";
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 import { v4 as uuidv4 } from "uuid";
+import Modal from "../common/Modal";
+import CreateForm from "../CreateForm";
 
 // Initial form fields for a form
-const initialFormFields: FormField[] = [
-  { id: uuidv4(), label: "First Name", type: "text", value: "", kind: "text" },
-  { id: uuidv4(), label: "Last Name", type: "text", value: "", kind: "text" },
-];
+// const initialFormFields: FormField[] = [
+//   { id: uuidv4(), label: "First Name", type: "text", value: "", kind: "text" },
+//   { id: uuidv4(), label: "Last Name", type: "text", value: "", kind: "text" },
+// ];
+
+const fetchForms = async (setFormDataCB: (value: updateFormData[]) => void) => {
+  const response = await fetch("https://tsapi.coronasafe.live/api/mock_test/");
+  const data = await response.json();
+  setFormDataCB(data);
+};
 
 function Home() {
-  const [formData, setFormData] = useState<FormData[]>([...getLocalForms()]);
+  const [formData, setFormData] = useState<updateFormData[]>([]);
   const [{ search }, setQuery] = useQueryParams();
   const [searchTerm, setSearchTerm] = useState("");
+  const [newForm, setNewForm] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetchForms(setFormData);
+  }, []);
 
   // Add a new form
-  const addForms = () => {
-    const localForms = getLocalForms();
-    const newForm = {
-      id: uuidv4(),
-      title: "Untitled Form",
-      formFields: initialFormFields,
-    };
+  // const addForms = () => {
+  //   const localForms = getLocalForms();
+  //   const newForm = {
+  //     id: uuidv4(),
+  //     title: "Untitled Form",
+  //     formFields: initialFormFields,
+  //   };
 
-    setFormData([...localForms, newForm]);
-    saveLocalForms([...localForms, newForm]);
-    navigate(`/form/${newForm.id}`);
-  };
+  //   setFormData([...localForms, newForm]);
+  //   saveLocalForms([...localForms, newForm]);
+  //   navigate(`/form/${newForm.id}`);
+  // };
 
-  // Delete a form
-  const deleteForm = (id: string) => {
-    const updatedLocalForms = formData.filter(
-      (form: FormData) => form.id !== id
-    );
-    setFormData(updatedLocalForms);
-    saveLocalForms(updatedLocalForms);
-  };
+  // // Delete a form
+  // const deleteForm = (id: string) => {
+  //   const updatedLocalForms = formData.filter(
+  //     (form: FormData) => form.id !== id
+  //   );
+  //   setFormData(updatedLocalForms);
+  //   saveLocalForms(updatedLocalForms);
+  // };
+
   return (
     <div>
       <div className="flex-col my-3 gap-4">
@@ -71,26 +85,31 @@ function Home() {
               .toLowerCase()
               .includes(search?.toLowerCase() || "");
           })
-          .map((form: FormData) => {
+          .map((form: updateFormData) => {
             return (
               <FormCard
                 key={form.id}
                 id={form.id}
                 title={form.title}
-                formFields={form.formFields}
-                deleteFormCB={deleteForm}
+                // formFields={form.formFields}
+                // deleteFormCB={deleteForm}
               />
             );
           })}
       </div>
       <div className="mt-4">
         <button
-          onClick={addForms}
+          onClick={() => {
+            setNewForm(true);
+          }}
           className="w-full p-3 text-center border border-slate-200 rounded-md shadow-xl"
         >
           Create New Form
         </button>
       </div>
+      <Modal open={newForm} closeCB={() => setNewForm(false)}>
+        <CreateForm />
+      </Modal>
     </div>
   );
 }

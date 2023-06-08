@@ -5,6 +5,7 @@ import About from "../components/About";
 import Form from "../components/Form";
 import Preview from "../components/Preview";
 import Errorpage from "../components/Errorpage";
+import CreateForm from "../CreateForm";
 
 const routes = {
   "/": () => <App />,
@@ -14,6 +15,7 @@ const routes = {
   "/preview/:id": ({ id }: { id: string }) => (
     <Preview formId={(id)} />
   ),
+  "/createForm": () => <CreateForm />,
 };
 
 export default function AppRouter() {

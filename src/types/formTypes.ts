@@ -4,6 +4,20 @@ export type FormData = {
     formFields: FormField[];
 }
 
+export type Form = {
+    id?: number;
+    title: string;
+    description?: string;
+    is_public?: boolean;
+}
+
+export type Errors<T> = Partial<Record<keyof T, string>>;
+
+export type updateFormData = {
+    id: number;
+    title: string;
+}
+
 export type TextField = {
     kind: "text";
     id: string;

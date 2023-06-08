@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { FormField, allFieldTypes, fieldKind, otherFieldTypes, textFieldTypes } from "../types/formTypes";
+import { Errors, Form, FormField, allFieldTypes, fieldKind, otherFieldTypes, textFieldTypes } from "../types/formTypes";
 
 const textFields: textFieldTypes[] = [
     "text",
@@ -108,3 +108,15 @@ export const updateKind: (type: allFieldTypes) => fieldKind = (
             return "multiselectdrop";
     }
 };
+
+
+export const validateForm: (form: Form) => Errors<Form> = (form: Form) => {
+    const errors: Errors<Form> = {};
+    if (form.title.length < 1) {
+        errors.title = "Title is required";
+    }
+    if (form.title.length > 100) {
+        errors.title = "Title must be less than 100 characters";
+    }
+    return errors;
+}

@@ -3,10 +3,10 @@ import { FormField } from "../types/formTypes";
 import { navigate } from "raviger";
 
 function FormCard(props: {
-  id: string;
+  id: number;
   title: string;
-  formFields: FormField[];
-  deleteFormCB: (id: string) => void;
+  // formFields: FormField[];
+  // deleteFormCB: (id: string) => void;
 }) {
   return (
     <>
@@ -36,7 +36,7 @@ function FormCard(props: {
           </button>
           <button
             onClick={(event) => {
-              props.deleteFormCB(props.id);
+              // props.deleteFormCB(props.id);
             }}
             className="bg-white p-2 rounded-lg border"
           >
