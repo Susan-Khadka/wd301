@@ -2,6 +2,8 @@ import React, { FormEvent, useState } from "react";
 import { Errors, Form } from "./types/formTypes";
 import { validateForm } from "./utils/FromUtils";
 import { navigate } from "raviger";
+import { create } from "domain";
+import { createForm } from "./utils/apiUtils";
 
 export default function CreateForm() {
   const [form, setForm] = useState<Form>({
@@ -18,23 +20,13 @@ export default function CreateForm() {
     // console.log(Object.keys(validationErrors).length > 0 && "You have a validation error") ;
     if (Object.keys(validationErrors).length === 0) {
       // Basic Auth Credentials
-      const auth = "Basic " + window.btoa("abhinabhkhadka:7622070652@Ss");
-      const response = await fetch("https://tsapi.coronasafe.live/api/forms/", {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: auth,
-        },
-        body: JSON.stringify(form),
-      });
 
-      const data = await response.json();
-      console.log(data.id);
+      const data = await createForm(form);
+      console.log(data);
 
-      if (response.ok) {
-        navigate(`/forms/${data.id}`);
-      }
+      // if (response.ok) {
+      //   navigate(`/forms/${data.id}`);
+      // }
     }
   };
 
