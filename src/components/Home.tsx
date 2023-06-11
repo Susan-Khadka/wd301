@@ -6,6 +6,7 @@ import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 import { v4 as uuidv4 } from "uuid";
 import Modal from "../common/Modal";
 import CreateForm from "../CreateForm";
+import { listForms } from "../utils/apiUtils";
 
 // Initial form fields for a form
 // const initialFormFields: FormField[] = [
@@ -14,9 +15,8 @@ import CreateForm from "../CreateForm";
 // ];
 
 const fetchForms = async (setFormDataCB: (value: updateFormData[]) => void) => {
-  const response = await fetch("https://tsapi.coronasafe.live/api/mock_test/");
-  const data = await response.json();
-  setFormDataCB(data);
+  const data = await listForms();
+  setFormDataCB(data.results);
 };
 
 function Home() {
@@ -79,23 +79,24 @@ function Home() {
             />
           </form>
         </div>
-        {formData
-          .filter((form) => {
-            return form.title
-              .toLowerCase()
-              .includes(search?.toLowerCase() || "");
-          })
-          .map((form: updateFormData) => {
-            return (
-              <FormCard
-                key={form.id}
-                id={form.id}
-                title={form.title}
-                // formFields={form.formFields}
-                // deleteFormCB={deleteForm}
-              />
-            );
-          })}
+        {formData &&
+          formData
+            .filter((form) => {
+              return form.title
+                .toLowerCase()
+                .includes(search?.toLowerCase() || "");
+            })
+            .map((form: updateFormData) => {
+              return (
+                <FormCard
+                  key={form.id}
+                  id={form.id}
+                  title={form.title}
+                  // formFields={form.formFields}
+                  // deleteFormCB={deleteForm}
+                />
+              );
+            })}
       </div>
       <div className="mt-4">
         <button

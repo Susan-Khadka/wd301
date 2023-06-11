@@ -2,7 +2,6 @@ import React, { FormEvent, useState } from "react";
 import { Errors, Form } from "./types/formTypes";
 import { validateForm } from "./utils/FromUtils";
 import { navigate } from "raviger";
-import { create } from "domain";
 import { createForm } from "./utils/apiUtils";
 
 export default function CreateForm() {
@@ -17,16 +16,15 @@ export default function CreateForm() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const validationErrors: Errors<Form> = validateForm(form);
-    // console.log(Object.keys(validationErrors).length > 0 && "You have a validation error") ;
     if (Object.keys(validationErrors).length === 0) {
       // Basic Auth Credentials
-
-      const data = await createForm(form);
-      console.log(data);
-
-      // if (response.ok) {
-      //   navigate(`/forms/${data.id}`);
-      // }
+      try {
+        const data = await createForm(form);
+        navigate(`/forms/${data.id}`);
+      } catch (error) {
+        console.log("The error is from CreateForm.tsx Line 25");
+        console.log(error);
+      }
     }
   };
 

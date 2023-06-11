@@ -6,19 +6,24 @@ const base_url = "https://tsapi.coronasafe.live/api/";
 
 export const request = async (endpoint: string, method: methodType = "GET", data: any = {}) => {
     let url: string;
-    let payload: string;
+    let payload: string | null;
     if (method === "GET") {
         const requestParams = data ? Object.keys(data).map((key) => `${key}=${data[key]}`).join("&") : "";
         url = `${base_url}${endpoint}${requestParams}`;
-        payload = "";
+        payload = null;
     } else {
         url = `${base_url}${endpoint}`;
         payload = data ? JSON.stringify(data) : "";
     }
-    const auth = "Basic " + window.btoa("abhinabhkhadka:7622070652@Ss");
+    // Basic Authentication
+    // const auth = "Basic " + window.btoa("abhinabhkhadka:7622070652@Ss");
+    // Token Authentication
+    const token = localStorage.getItem("token");
+    const auth = token ? "Token " + localStorage.getItem("token") : "";
+
     const response = await fetch(
         url, {
-        method: "POST",
+        method: method,
         mode: "cors",
         headers: {
             "Content-Type": "application/json",
@@ -26,16 +31,43 @@ export const request = async (endpoint: string, method: methodType = "GET", data
         },
         body: payload,
     });
+    // console.log(response);
     if (response.ok) {
         const JSONResponse = await response.json();
         return JSONResponse;
     } else {
         const errorJSON = await response.json();
-        throw Error(errorJSON);
+        console.log(errorJSON);
     }
 }
 
 export const createForm = async (form: Form) => {
-    const response = await request("form", "POST", form);
+    const response = await request("forms/", "POST", form);
+    return response;
+}
+
+
+export const login = async (credentials: object) => {
+    const response = await request("auth-token/", "POST", credentials);
+    return response;
+}
+
+export const register = async (credentials: object) => {
+    const response = await request("auth/registration/", "POST", credentials);
+    return response;
+}
+
+export const getAllForms = async () => {
+    const response = await request("mock_test/");
+    return response;
+}
+
+export const me = async () => {
+    const response = await request("users/me/");
+    return response;
+}
+
+export const listForms = async () => {
+    const response = await request("forms/", "GET");
     return response;
 }
