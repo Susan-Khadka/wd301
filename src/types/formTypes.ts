@@ -13,10 +13,10 @@ export type Form = {
 
 export type Errors<T> = Partial<Record<keyof T, string>>;
 
-export type updateFormData = {
-    id: number;
-    title: string;
-}
+// export type updateFormData = {
+//     id: number;
+//     title: string;
+// }
 
 export type TextField = {
     kind: "text";

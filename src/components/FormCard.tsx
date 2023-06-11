@@ -3,7 +3,7 @@ import { FormField } from "../types/formTypes";
 import { navigate } from "raviger";
 
 function FormCard(props: {
-  id: number;
+  id: number | undefined;
   title: string;
   // formFields: FormField[];
   // deleteFormCB: (id: string) => void;

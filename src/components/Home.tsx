@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import FormCard from "./FormCard";
-import { FormData, FormField, updateFormData } from "../types/formTypes";
+import { Form, FormData, FormField } from "../types/formTypes";
 import { navigate, useQueryParams } from "raviger";
 import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 import { v4 as uuidv4 } from "uuid";
 import Modal from "../common/Modal";
 import CreateForm from "../CreateForm";
 import { listForms } from "../utils/apiUtils";
+import { Pagination } from "../types/common";
 
 // Initial form fields for a form
 // const initialFormFields: FormField[] = [
@@ -14,13 +15,17 @@ import { listForms } from "../utils/apiUtils";
 //   { id: uuidv4(), label: "Last Name", type: "text", value: "", kind: "text" },
 // ];
 
-const fetchForms = async (setFormDataCB: (value: updateFormData[]) => void) => {
-  const data = await listForms();
-  setFormDataCB(data.results);
+const fetchForms = async (setFormDataCB: (value: Form[]) => void) => {
+  try {
+    const data: Pagination<Form> = await listForms({ offset: 0, limit: 3 });
+    setFormDataCB(data.results);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 function Home() {
-  const [formData, setFormData] = useState<updateFormData[]>([]);
+  const [formData, setFormData] = useState<Form[]>([]);
   const [{ search }, setQuery] = useQueryParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [newForm, setNewForm] = useState<boolean>(false);
@@ -86,7 +91,7 @@ function Home() {
                 .toLowerCase()
                 .includes(search?.toLowerCase() || "");
             })
-            .map((form: updateFormData) => {
+            .map((form: Form) => {
               return (
                 <FormCard
                   key={form.id}

@@ -1,3 +1,4 @@
+import { PaginationParams } from "../types/common";
 import { Form } from "../types/formTypes";
 
 type methodType = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
@@ -8,15 +9,14 @@ export const request = async (endpoint: string, method: methodType = "GET", data
     let url: string;
     let payload: string | null;
     if (method === "GET") {
-        const requestParams = data ? Object.keys(data).map((key) => `${key}=${data[key]}`).join("&") : "";
+        const requestParams = data ? "?" + Object.keys(data).map((key) => `${key}=${data[key]}`).join("&") : "";
         url = `${base_url}${endpoint}${requestParams}`;
         payload = null;
     } else {
         url = `${base_url}${endpoint}`;
         payload = data ? JSON.stringify(data) : "";
     }
-    // Basic Authentication
-    // const auth = "Basic " + window.btoa("abhinabhkhadka:7622070652@Ss");
+
     // Token Authentication
     const token = localStorage.getItem("token");
     const auth = token ? "Token " + localStorage.getItem("token") : "";
@@ -57,17 +57,12 @@ export const register = async (credentials: object) => {
     return response;
 }
 
-export const getAllForms = async () => {
-    const response = await request("mock_test/");
-    return response;
-}
-
 export const me = async () => {
     const response = await request("users/me/");
     return response;
 }
 
-export const listForms = async () => {
-    const response = await request("forms/", "GET");
+export const listForms = async (params: PaginationParams) => {
+    const response = await request("forms/", "GET", params);
     return response;
 }
