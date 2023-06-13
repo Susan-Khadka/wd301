@@ -1,29 +1,29 @@
 import React, { ChangeEvent, useState } from "react";
-import { DropdownField, radioField } from "../types/formTypes";
+import { DropdownField, radioField, updatedFormFields } from "../types/formTypes";
 
 type Props = {
-  fields: DropdownField | radioField;
+  fields: updatedFormFields;
   onChangeCB: (id: string, label: string) => void;
   removeFieldCB: (id: string) => void;
   updateOptionCB: (id: string, options: string[]) => void;
 };
 
 function Singleselectfields(props: Props) {
-  const [options, setOptions] = useState<string[]>(props.fields.options);
+  // const [options, setOptions] = useState<string[]>(props.fields.options);
   const [newOption, setNewOption] = useState<string>("");
 
-  const updatedOptionsList: (
-    event: ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => string[] = (event, index) => {
-    const newOptions = props.fields.options.map((option, i) => {
-      if (i === index) {
-        return event.target.value;
-      }
-      return option;
-    });
-    return newOptions;
-  };
+  // const updatedOptionsList: (
+  //   event: ChangeEvent<HTMLInputElement>,
+  //   index: number
+  // ) => string[] = (event, index) => {
+  //   const newOptions = props.fields.options.map((option, i) => {
+  //     if (i === index) {
+  //       return event.target.value;
+  //     }
+  //     return option;
+  //   });
+  //   return newOptions;
+  // };
 
   return (
     <div className="mb-4 border p-2 rounded-lg bg-zinc-50">
@@ -33,7 +33,7 @@ function Singleselectfields(props: Props) {
       <div className="flex gap-2 items-center">
         <input
           onChange={(event) => {
-            props.onChangeCB(props.fields.id, event.target.value);
+            // props.onChangeCB(props.fields.id, event.target.value);
           }}
           id={`${props.fields.kind}-${props.fields.id}`}
           name={`${props.fields.kind}-${props.fields.id}`}
@@ -42,7 +42,7 @@ function Singleselectfields(props: Props) {
           type={"text"}
         />
         <button
-          onClick={() => props.removeFieldCB(props.fields.id)}
+          // onClick={() => props.removeFieldCB(props.fields.id)}
           className="px-2 py-2 border rounded-md "
         >
           <svg
@@ -63,7 +63,7 @@ function Singleselectfields(props: Props) {
       </div>
       <div className="mt-3 ml-4">
         <p>Options</p>
-        {options.map((option, index) => {
+        {/* {options.map((option, index) => {
           return (
             <div
               className="flex gap-2 items-center my-2"
@@ -111,7 +111,7 @@ function Singleselectfields(props: Props) {
               </button>
             </div>
           );
-        })}
+        })} */}
       </div>
       <div className="mt-2 flex gap-2 ml-4">
         <input
@@ -126,9 +126,9 @@ function Singleselectfields(props: Props) {
         <button
           onClick={(event) => {
             event.preventDefault();
-            const updatedOptions = [...options, newOption];
-            setOptions(updatedOptions);
-            props.updateOptionCB(props.fields.id, updatedOptions);
+            // const updatedOptions = [...options, newOption];
+            // setOptions(updatedOptions);
+            // props.updateOptionCB(props.fields.id, updatedOptions);
             setNewOption("");
           }}
           className="bg-blue-500 text-white px-2 py-2 border rounded-md"

@@ -18,6 +18,7 @@ const otherFields: otherFieldTypes[] = [
 ];
 
 export const allFields: allFieldTypes[] = [...textFields, ...otherFields];
+export const updatedKind = ["TEXT", "DROPDOWN", "RADIO", "GENERIC"];
 
 export const getNewField = (kind: fieldKind, label: string) => {
     switch (kind) {

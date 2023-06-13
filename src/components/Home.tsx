@@ -9,12 +9,6 @@ import CreateForm from "../CreateForm";
 import { listForms } from "../utils/apiUtils";
 import { Pagination } from "../types/common";
 
-// Initial form fields for a form
-// const initialFormFields: FormField[] = [
-//   { id: uuidv4(), label: "First Name", type: "text", value: "", kind: "text" },
-//   { id: uuidv4(), label: "Last Name", type: "text", value: "", kind: "text" },
-// ];
-
 const fetchForms = async (setFormDataCB: (value: Form[]) => void) => {
   try {
     const data: Pagination<Form> = await listForms({ offset: 0, limit: 3 });
@@ -92,15 +86,9 @@ function Home() {
                 .includes(search?.toLowerCase() || "");
             })
             .map((form: Form) => {
-              return (
-                <FormCard
-                  key={form.id}
-                  id={form.id}
-                  title={form.title}
-                  // formFields={form.formFields}
-                  // deleteFormCB={deleteForm}
-                />
-              );
+              return form.id !== undefined ? (
+                <FormCard key={form.id} id={form.id} title={form.title} />
+              ) : null;
             })}
       </div>
       <div className="mt-4">

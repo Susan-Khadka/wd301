@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { MultiSelectDrop, Option, checkboxField } from "../types/formTypes";
+import { MultiSelectDrop, Option, checkboxField, updatedFormFields } from "../types/formTypes";
 import { v4 as uuid } from "uuid";
 
 type Props = {
-  fields: checkboxField | MultiSelectDrop;
+  fields: updatedFormFields;
   onChangeCB: (id: string, label: string) => void;
   removeFieldCB: (id: string) => void;
   optionUpdateCB: (id: string, options: Option[]) => void;
@@ -12,27 +12,27 @@ type Props = {
 type editOptions = (option: Option, value: string) => void;
 
 function MultiselectComp(props: Props) {
-  const [options, setOptions] = useState<Option[]>(props.fields.options);
+  // const [options, setOptions] = useState<Option[]>(props.fields.options);
   const [newOption, setNewOption] = useState<Option>({ id: uuid(), value: "" });
 
-  const editOptions: editOptions = (option, value) => {
-    const updatedOptions: Option[] = options.map((opt: Option) => {
-      if (opt.id === option.id) {
-        return { ...opt, value };
-      }
-      return opt;
-    });
-    setOptions(updatedOptions);
-    props.optionUpdateCB(props.fields.id, updatedOptions);
-  };
+  // const editOptions: editOptions = (option, value) => {
+  //   const updatedOptions: Option[] = options.map((opt: Option) => {
+  //     if (opt.id === option.id) {
+  //       return { ...opt, value };
+  //     }
+  //     return opt;
+  //   });
+  //   setOptions(updatedOptions);
+  //   props.optionUpdateCB(props.fields.id, updatedOptions);
+  // };
 
-  const deleteOption: (option: Option) => void = (option) => {
-    const newOptions: Option[] = options.filter((opt) => {
-      return option.id !== opt.id;
-    });
-    setOptions(newOptions);
-    props.optionUpdateCB(props.fields.id, newOptions);
-  };
+  // const deleteOption: (option: Option) => void = (option) => {
+  //   const newOptions: Option[] = options.filter((opt) => {
+  //     return option.id !== opt.id;
+  //   });
+  //   setOptions(newOptions);
+  //   // props.optionUpdateCB(props.fields.id, newOptions);
+  // };
 
   return (
     <div className="mb-4 border p-2 rounded-lg bg-zinc-50">
@@ -42,7 +42,7 @@ function MultiselectComp(props: Props) {
       <div className="flex gap-2 items-center">
         <input
           onChange={(event) => {
-            props.onChangeCB(props.fields.id, event.target.value);
+            // props.onChangeCB(props.fields.id, event.target.value);
           }}
           id={`${props.fields.kind}-${props.fields.id}`}
           name={`${props.fields.kind}-${props.fields.id}`}
@@ -51,7 +51,7 @@ function MultiselectComp(props: Props) {
           type={"text"}
         />
         <button
-          onClick={() => props.removeFieldCB(props.fields.id)}
+          // onClick={() => props.removeFieldCB(props.fields.id)}
           className="px-2 py-2 border rounded-md "
         >
           <svg
@@ -72,7 +72,7 @@ function MultiselectComp(props: Props) {
       </div>
       <div className="mt-3 ml-4">
         <p>Options</p>
-        {options.map((option, index) => {
+        {/* {options.map((option, index) => {
           return (
             <div key={`${option.id}-${index}`} className="flex gap-2 items-center my-2">
               <input
@@ -109,7 +109,7 @@ function MultiselectComp(props: Props) {
               </button>
             </div>
           );
-        })}
+        })} */}
       </div>
       <div className="mt-2 flex gap-2 ml-4">
         <input
@@ -127,9 +127,9 @@ function MultiselectComp(props: Props) {
         <button
           onClick={(event) => {
             event.preventDefault();
-            const updatedOptions = [...options, newOption];
-            setOptions(updatedOptions);
-            props.optionUpdateCB(props.fields.id, updatedOptions);
+            // const updatedOptions = [...options, newOption];
+            // setOptions(updatedOptions);
+            // props.optionUpdateCB(props.fields.id, updatedOptions);
             setNewOption({ id: uuid(), value: "" });
           }}
           className="bg-blue-500 text-white px-2 py-2 border rounded-md"

@@ -11,12 +11,15 @@ export type Form = {
     is_public?: boolean;
 }
 
-export type Errors<T> = Partial<Record<keyof T, string>>;
+export type updatedFormFields = {
+    id?: string;
+    label: string;
+    kind: updatedFieldKind;
+    options?: Option[];
+    type?: string;
+}
 
-// export type updateFormData = {
-//     id: number;
-//     title: string;
-// }
+export type Errors<T> = Partial<Record<keyof T, string>>;
 
 export type TextField = {
     kind: "text";
@@ -70,6 +73,8 @@ export type MultiSelectDrop = {
     options: Option[];
     value: Option[];
 }
+
+export type updatedFieldKind = "TEXT" | "DROPDOWN" | "RADIO";
 
 export type fieldKind = "text" | "dropdown" | "radio" | "checkbox" | "textarea" | "multiselectdrop";
 

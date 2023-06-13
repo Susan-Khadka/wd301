@@ -4,7 +4,7 @@ import { ActiveLink } from "raviger";
 import { User } from "./types/userTypes";
 
 function Header(props: { currentUser: User }) {
-  console.log(props.currentUser);
+  // console.log(props.currentUser);
   return (
     <div className="flex items-center justify-start">
       <div>

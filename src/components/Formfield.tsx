@@ -1,20 +1,20 @@
 import React from "react";
-import { TextArea, TextField } from "../types/formTypes";
+import { TextArea, TextField, updatedFormFields } from "../types/formTypes";
 
 function Formfield(props: {
   removeFieldCB: (id: string) => void;
   onChangeCB: (id: string, label: string) => void;
-  fields: TextField | TextArea;
+  fields: updatedFormFields;
 }) {
   return (
     <div className="mb-4 border p-2 rounded-lg bg-zinc-50">
       <label htmlFor={`${props.fields.type}-${props.fields.id}`}>
-        {props.fields.type}
+        {props.fields.kind}
       </label>
       <div className="flex gap-2 items-center">
         <input
           onChange={(event) => {
-            props.onChangeCB(props.fields.id, event.target.value);
+            // props.onChangeCB(props.fields.id, event.target.value);
           }}
           id={`${props.fields.type}-${props.fields.id}`}
           name={`${props.fields.type}-${props.fields.id}`}
@@ -23,7 +23,10 @@ function Formfield(props: {
           type={"text"}
         />
         <button
-          onClick={() => props.removeFieldCB(props.fields.id)}
+          onClick={(e) => {
+            e.preventDefault();
+            props.removeFieldCB(props.fields.id!);
+          }}
           className="px-2 py-2 border rounded-md "
         >
           <svg
