@@ -38,7 +38,6 @@ export const createForm = async (form: Form) => {
     return response;
 }
 
-
 export const login = async (credentials: object) => {
     const response = await request("auth-token/", "POST", credentials);
     return response;
@@ -59,7 +58,7 @@ export const listForms = async (params: PaginationParams) => {
     return response;
 }
 
-export const loadForm = async (id: number) => {
+export const loadForm: (id: number) => Promise<Form> = async (id) => {
     const form: Form = await request(`forms/${id}/`);
     return form;
 }
@@ -73,6 +72,15 @@ export const updateForm = async (id: number, form: Form) => {
     const response = await request(`forms/${id}/`, "PATCH", form);
     return response;
 }
+export const updateTitle = async (id: number, title: Form["title"]) => {
+    const response = await request(`forms/${id}/`, "PATCH", { title });
+    return response;
+}
+
+export const updateDescription = async (id: number, description: Form["description"]) => {
+    const response = await request(`forms/${id}/`, "PATCH", { description });
+    return response;
+}
 
 export const createField = async (id: number, field: updatedFormFields) => {
     const response = await request(`forms/${id}/fields/`, "POST", field);
@@ -82,5 +90,16 @@ export const createField = async (id: number, field: updatedFormFields) => {
 
 export const deleteField = async (formid: number, id: number) => {
     const response = await request(`forms/${formid}/fields/${id}/`, "DELETE");
+    return response;
+}
+
+export const deleteForm = async (id: number) => {
+    const response = await request(`forms/${id}/`, "DELETE");
+    return response;
+}
+
+
+export const updateLabel = async (formid: number, id: number, label: updatedFormFields["label"]) => {
+    const response = await request(`forms/${formid}/fields/${id}/`, "PATCH", { label });
     return response;
 }

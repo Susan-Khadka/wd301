@@ -1,5 +1,9 @@
 import React, { ChangeEvent, useState } from "react";
-import { DropdownField, radioField, updatedFormFields } from "../types/formTypes";
+import {
+  DropdownField,
+  radioField,
+  updatedFormFields,
+} from "../types/formTypes";
 
 type Props = {
   fields: updatedFormFields;
@@ -42,7 +46,7 @@ function Singleselectfields(props: Props) {
           type={"text"}
         />
         <button
-          // onClick={() => props.removeFieldCB(props.fields.id)}
+          onClick={() => props.removeFieldCB(props.fields.id!)}
           className="px-2 py-2 border rounded-md "
         >
           <svg

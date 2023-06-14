@@ -6,7 +6,7 @@ import { getLocalForms, saveLocalForms } from "../utils/storageUtils";
 import { v4 as uuidv4 } from "uuid";
 import Modal from "../common/Modal";
 import CreateForm from "../CreateForm";
-import { listForms } from "../utils/apiUtils";
+import { deleteForm, listForms } from "../utils/apiUtils";
 import { Pagination } from "../types/common";
 
 const fetchForms = async (setFormDataCB: (value: Form[]) => void) => {
@@ -51,6 +51,22 @@ function Home() {
   //   saveLocalForms(updatedLocalForms);
   // };
 
+  const deleteFormCB = async (id: string) => {
+    // Delete form from the state
+    const updatedLocalForms = formData.filter(
+      (form: Form) => form.id! !== Number(id)
+    );
+    setFormData(updatedLocalForms);
+    // Backend call to delete form
+    deleteForm(Number(id))
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   return (
     <div>
       <div className="flex-col my-3 gap-4">
@@ -87,7 +103,12 @@ function Home() {
             })
             .map((form: Form) => {
               return form.id !== undefined ? (
-                <FormCard key={form.id} id={form.id} title={form.title} />
+                <FormCard
+                  deleteFormCB={deleteFormCB}
+                  key={form.id}
+                  id={form.id}
+                  title={form.title}
+                />
               ) : null;
             })}
       </div>

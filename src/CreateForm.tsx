@@ -18,13 +18,15 @@ export default function CreateForm() {
     const validationErrors: Errors<Form> = validateForm(form);
     if (Object.keys(validationErrors).length === 0) {
       // Basic Auth Credentials
-      try {
-        const data = await createForm(form);
-        navigate(`/forms/${data.id}`);
-      } catch (error) {
-        console.log("The error is from CreateForm.tsx Line 25");
-        console.log(error);
-      }
+
+      await createForm(form)
+        .then((data) => {
+          console.log(data);
+          navigate(`/form/${data.id}`);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   };
 

@@ -1,12 +1,10 @@
 import React from "react";
-import { FormField } from "../types/formTypes";
 import { navigate } from "raviger";
 
 function FormCard(props: {
   id: number;
   title: string;
-  // formFields: FormField[];
-  // deleteFormCB: (id: string) => void;
+  deleteFormCB: (id: string) => Promise<void>;
 }) {
   return (
     <>
@@ -36,7 +34,8 @@ function FormCard(props: {
           </button>
           <button
             onClick={(event) => {
-              console.log("Delete this form");
+              event.preventDefault();
+              props.deleteFormCB(String(props.id));
             }}
             className="bg-white p-2 rounded-lg border"
           >

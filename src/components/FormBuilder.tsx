@@ -1,11 +1,7 @@
 import React, { useEffect, useReducer, useRef, useState } from "react";
 
-import Formfield from "./Formfield";
 import {
   FormData,
-  FormField,
-  allFieldTypes,
-  fieldKind,
   Form,
   updatedFormFields,
   updatedFieldKind,
@@ -14,20 +10,15 @@ import {
 import { Link, navigate } from "raviger";
 
 import Singleselectfields from "./Singleselectfields";
-import MultiselectComp from "./MultiselectComp";
-import { Option } from "../types/formTypes";
-import {
-  allFields,
-  getNewField,
-  updateKind,
-  updatedKind,
-} from "../utils/FromUtils";
+import { updatedKind } from "../utils/FromUtils";
 import {
   createField,
   deleteField,
   loadForm,
   loadFormfields,
-  updateForm,
+  updateDescription,
+  updateLabel,
+  updateTitle,
 } from "../utils/apiUtils";
 import { Pagination } from "../types/common";
 
@@ -46,6 +37,11 @@ type UpdateTitleAction = {
   title: string;
 };
 
+type UpdateDescriptionAction = {
+  type: "UPDATE_DESC";
+  description: string;
+};
+
 type AddFieldAction = {
   type: "ADD_FIELD";
   id: number;
@@ -59,11 +55,19 @@ type DeleteFieldAction = {
   fieldId: number;
 };
 
+type updateFieldAction = {
+  type: "UPDATE_FIELD";
+  id: string;
+  label: string;
+};
+
 type Action =
   | AddFieldAction
   | InitializeState
   | UpdateTitleAction
-  | DeleteFieldAction;
+  | UpdateDescriptionAction
+  | DeleteFieldAction
+  | updateFieldAction;
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -71,7 +75,6 @@ const reducer = (state: State, action: Action) => {
       return action.data;
     }
     case "UPDATE_TITLE": {
-      // Updating the state
       return {
         ...state,
         form: {
@@ -101,33 +104,53 @@ const reducer = (state: State, action: Action) => {
         }),
       };
     }
+    case "UPDATE_DESC": {
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          description: action.description,
+        },
+      };
+    }
+    case "UPDATE_FIELD": {
+      return {
+        ...state,
+        formFields: state.formFields.map((formFields: updatedFormFields) => {
+          if (formFields.id === action.id) {
+            return {
+              ...formFields,
+              label: action.label,
+            };
+          }
+          return formFields;
+        }),
+      };
+    }
   }
   return state;
 };
 
-const updateFromData = async (state: State, title: string) => {
-  await updateForm(state.form.id!, {
-    ...state.form,
-    title,
-  });
-};
-
-function FormBuilder(props: { selectedFormID: string }) {
+function FormBuilder(props: { formId: string }) {
   const initializerState: State = {
-    form: {} as Form,
+    form: {
+      title: "",
+      description: "",
+    } as Form,
     formFields: [] as updatedFormFields[],
   };
 
   const [state, dispatch] = useReducer(reducer, initializerState);
 
   useEffect(() => {
-    updatedInitialState(props.selectedFormID).then((data) => {
+    updatedInitialState(props.formId).then((data) => {
       dispatch({ type: "INITIALIZE_STATE", data });
     });
-  }, [props.selectedFormID]);
+  }, [props.formId]);
 
   const updatedInitialState = async (id: string) => {
     const form = await loadForm(Number(id));
+
     const formFields: Pagination<updatedFormFields> = await loadFormfields(
       Number(id)
     );
@@ -139,26 +162,35 @@ function FormBuilder(props: { selectedFormID: string }) {
 
   const [newField, setNewField] = useState("");
   const [kind, setKind] = useState<updatedFieldKind>("TEXT");
-  const [fieldType, setFieldType] = useState<allFieldTypes>("text");
   const titleRef = useRef<HTMLInputElement>(null);
 
   const createFieldCB = async (
     id: number,
-    label: string,
-    kind: updatedFieldKind
+    label: updatedFormFields["label"],
+    kind: updatedFormFields["kind"]
   ) => {
     const field = await createField(state.form.id!, { label, kind });
     dispatch({ type: "ADD_FIELD", id: field.id, kind, label });
   };
 
+  const updateTitleCB = async (id: Form["id"], title: Form["title"]) => {
+    updateTitle(id!, title)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+    dispatch({ type: "UPDATE_TITLE", title });
+  };
+
+  const updateDescriptionCB = async (id: number, description: string) => {
+    updateDescription(id, description)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+    dispatch({ type: "UPDATE_DESC", description });
+  };
+
   const removeFieldCB = (id: string) => {
     deleteField(state.form.id!, Number(id))
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+      .then((data) => console.log(data))
+      .catch((err) => console.log(err));
     dispatch({
       type: "DELETE_FIELD",
       formId: state.form.id!,
@@ -166,18 +198,38 @@ function FormBuilder(props: { selectedFormID: string }) {
     });
   };
 
+  const updateLabelCB = (id: string, label: string) => {
+    updateLabel(state.form.id!, Number(id), label)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+    dispatch({ type: "UPDATE_FIELD", id, label });
+  };
+
   return (
     <div className="divide-y divide-dotted">
       <input
-        value={state.form.title === undefined ? "" : state.form.title}
+        value={state.form.title}
         onChange={(event) => {
-          dispatch({ type: "UPDATE_TITLE", title: event.target.value });
-          updateFromData(state, event.target.value);
+          updateTitleCB(state.form.id!, event.target.value);
         }}
         className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
         type="text"
+        placeholder="Title Here"
         ref={titleRef}
       />
+      <div>
+        <input
+          value={state.form.description!}
+          onChange={(e) => {
+            updateDescriptionCB(state.form.id!, e.target.value);
+          }}
+          className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
+          type="text"
+          placeholder="Description"
+          name="description"
+          id="description"
+        />
+      </div>
       <div className="">
         <form className="px-2 mt-4">
           {state.formFields.length === 0 && (
@@ -189,39 +241,50 @@ function FormBuilder(props: { selectedFormID: string }) {
             state.formFields.map((fields: updatedFormFields) => {
               if (fields.kind === "TEXT") {
                 return (
-                  <Formfield
+                  <div
                     key={fields.id}
-                    onChangeCB={(id, label) => {
-                      // dispatch({ type: "UPDATE_LABEL", id, label });
-                    }}
-                    removeFieldCB={(id) => {
-                      removeFieldCB(id);
-                    }}
-                    fields={fields}
-                  />
+                    className="mb-4 border p-2 rounded-lg bg-zinc-50"
+                  >
+                    <label htmlFor={`${fields.type}-${fields.id}`}>
+                      {fields.kind}
+                    </label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        onChange={(event) => {
+                          updateLabelCB(fields.id!, event.target.value);
+                        }}
+                        id={`${fields.type}-${fields.id}`}
+                        name={`${fields.type}-${fields.id}`}
+                        value={fields.label}
+                        className="border border-gray-200 rounded-lg p-2 flex-1"
+                        type={"text"}
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          removeFieldCB(fields.id!);
+                        }}
+                        className="px-2 py-2 border rounded-md "
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="w-6 h-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 );
-              }
-              // else if (
-              //   fields.kind === "multiselectdrop" ||
-              //   fields.kind === "checkbox"
-              // ) {
-              //   return (
-              //     <MultiselectComp
-              //       key={fields.id}
-              //       onChangeCB={(id, label) => {
-              //         // dispatch({ type: "UPDATE_LABEL", id, label });
-              //       }}
-              //       removeFieldCB={(id) => {
-              //         // dispatch({ type: "REMOVE_FIELD", id })
-              //       }}
-              //       fields={fields}
-              //       optionUpdateCB={(id, options) => {
-              //         // dispatch({ type: "MULTI_OPT_UPDATE", id, options });
-              //       }}
-              //     />
-              //   );
-              // }
-              else {
+              } else {
                 return (
                   <Singleselectfields
                     key={fields.id}
@@ -229,7 +292,7 @@ function FormBuilder(props: { selectedFormID: string }) {
                       // dispatch({ type: "UPDATE_LABEL", id, label });
                     }}
                     removeFieldCB={(id) => {
-                      // dispatch({ type: "REMOVE_FIELD", id })
+                      removeFieldCB(fields.id!);
                     }}
                     fields={fields}
                     updateOptionCB={(id, options) => {
@@ -252,19 +315,18 @@ function FormBuilder(props: { selectedFormID: string }) {
           />
           <div className="flex gap-2 mb-2">
             <select
-              value={fieldType}
+              value={kind}
               onChange={(event) => {
-                const value = event.target.value as allFieldTypes;
-                setFieldType(value);
-                // setKind(updateKind(value));
+                const value = event.target.value as updatedFieldKind;
+                setKind(value);
               }}
               className="p-2 border rounded-md w-11/12"
               name="type"
               id="type"
             >
-              {updatedKind.map((field) => {
+              {updatedKind.map((field: updatedFieldKind) => {
                 return (
-                  <option key={field} value={field}>
+                  <option id={field} key={field} value={field}>
                     {field.charAt(0).toUpperCase() +
                       field.slice(1).toLowerCase()}
                   </option>
