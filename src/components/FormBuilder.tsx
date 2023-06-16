@@ -1,15 +1,9 @@
 import React, { useEffect, useReducer, useRef, useState } from "react";
 
-import {
-  FormData,
-  Form,
-  updatedFormFields,
-  updatedFieldKind,
-} from "../types/formTypes";
+import { Form, updatedFormFields, updatedFieldKind } from "../types/formTypes";
 
 import { Link, navigate } from "raviger";
 
-import Singleselectfields from "./Singleselectfields";
 import { updatedKind } from "../utils/FromUtils";
 import {
   createField,
@@ -18,9 +12,12 @@ import {
   loadFormfields,
   updateDescription,
   updateLabel,
+  updateOption,
   updateTitle,
 } from "../utils/apiUtils";
 import { Pagination } from "../types/common";
+import TextField from "./TextField";
+import MultiselectComp from "./MultiselectComp";
 
 type State = {
   form: Form;
@@ -61,13 +58,35 @@ type updateFieldAction = {
   label: string;
 };
 
+type AddOptionAction = {
+  type: "ADD_OPTION";
+  id: string;
+  option: string;
+};
+
+type DeleteOptionAction = {
+  type: "DELETE_OPTION";
+  value: string;
+  id: string;
+};
+
+type EditOptionAction = {
+  type: "EDIT_OPTION";
+  id: string;
+  newValue: string;
+  oldValue: string;
+};
+
 type Action =
   | AddFieldAction
   | InitializeState
   | UpdateTitleAction
   | UpdateDescriptionAction
   | DeleteFieldAction
-  | updateFieldAction;
+  | updateFieldAction
+  | AddOptionAction
+  | DeleteOptionAction
+  | EditOptionAction;
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -121,6 +140,66 @@ const reducer = (state: State, action: Action) => {
             return {
               ...formFields,
               label: action.label,
+            };
+          }
+          return formFields;
+        }),
+      };
+    }
+    case "ADD_OPTION": {
+      return {
+        ...state,
+        formFields: state.formFields.map((formFields: updatedFormFields) => {
+          if (Number(formFields.id!) === Number(action.id)) {
+            if (
+              formFields.options === undefined ||
+              formFields.options === null
+            ) {
+              return {
+                ...formFields,
+                options: [action.option],
+              };
+            } else {
+              return {
+                ...formFields,
+                options: [...formFields.options, action.option],
+              };
+            }
+          } else {
+            return formFields;
+          }
+        }),
+      };
+    }
+    case "DELETE_OPTION": {
+      return {
+        ...state,
+        formFields: state.formFields.map((formFields: updatedFormFields) => {
+          if (Number(formFields.id) === Number(action.id)) {
+            return {
+              ...formFields,
+              options: formFields.options?.filter(
+                (opt) => opt !== action.value
+              ),
+            };
+          }
+          return formFields;
+        }),
+      };
+    }
+    case "EDIT_OPTION": {
+      return {
+        ...state,
+        formFields: state.formFields.map((formFields: updatedFormFields) => {
+          if (Number(formFields.id) === Number(action.id)) {
+            return {
+              ...formFields,
+              options: formFields.options?.map((opt) => {
+                if (opt === action.oldValue) {
+                  return action.newValue;
+                }
+                return opt;
+              }),
             };
           }
           return formFields;
@@ -187,6 +266,13 @@ function FormBuilder(props: { formId: string }) {
     dispatch({ type: "UPDATE_DESC", description });
   };
 
+  const updateLabelCB = (id: string, label: string) => {
+    updateLabel(state.form.id!, Number(id), label)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+    dispatch({ type: "UPDATE_FIELD", id, label });
+  };
+
   const removeFieldCB = (id: string) => {
     deleteField(state.form.id!, Number(id))
       .then((data) => console.log(data))
@@ -198,11 +284,67 @@ function FormBuilder(props: { formId: string }) {
     });
   };
 
-  const updateLabelCB = (id: string, label: string) => {
-    updateLabel(state.form.id!, Number(id), label)
+  const addOptionCB = async (id: string, option: string) => {
+    dispatch({ type: "ADD_OPTION", id, option });
+
+    const field = state.formFields.find(
+      (field) => Number(field.id) === Number(id)
+    );
+
+    let options: string[];
+
+    if (field?.options == null) {
+      options = [option];
+    } else {
+      options = [...field!.options!, option];
+    }
+
+    updateOption(state.form.id!, Number(id), options)
       .then((res) => console.log(res))
       .catch((err) => console.log(err));
-    dispatch({ type: "UPDATE_FIELD", id, label });
+  };
+
+  const editOptionCB = async (
+    id: string,
+    newValue: string,
+    oldValue: string
+  ) => {
+    const field = state.formFields.find(
+      (fields) => Number(fields.id) === Number(id)
+    );
+    let options: string[];
+    if (field?.options == null) {
+      options = [];
+    } else {
+      options = field?.options?.map((opt) => {
+        if (opt === oldValue) {
+          return newValue;
+        }
+        return opt;
+      });
+    }
+    updateOption(state.form.id!, Number(id), options);
+    dispatch({ type: "EDIT_OPTION", id, newValue, oldValue });
+  };
+
+  const deleteOptionCB = async (id: string, option: string) => {
+    dispatch({ type: "DELETE_OPTION", id, value: option });
+
+    const field = state.formFields.find(
+      (fields) => Number(fields.id) === Number(id)
+    );
+
+    let options: string[];
+
+    if (field?.options == null) {
+      options = [];
+    } else {
+      options = field?.options?.filter((opt) => opt !== option);
+    }
+
+    updateOption(state.form.id!, Number(id), options)
+      .then((res) => console.log(res))
+      .catch((error) => console.log(error));
   };
 
   return (
@@ -241,63 +383,23 @@ function FormBuilder(props: { formId: string }) {
             state.formFields.map((fields: updatedFormFields) => {
               if (fields.kind === "TEXT") {
                 return (
-                  <div
+                  <TextField
                     key={fields.id}
-                    className="mb-4 border p-2 rounded-lg bg-zinc-50"
-                  >
-                    <label htmlFor={`${fields.type}-${fields.id}`}>
-                      {fields.kind}
-                    </label>
-                    <div className="flex gap-2 items-center">
-                      <input
-                        onChange={(event) => {
-                          updateLabelCB(fields.id!, event.target.value);
-                        }}
-                        id={`${fields.type}-${fields.id}`}
-                        name={`${fields.type}-${fields.id}`}
-                        value={fields.label}
-                        className="border border-gray-200 rounded-lg p-2 flex-1"
-                        type={"text"}
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          removeFieldCB(fields.id!);
-                        }}
-                        className="px-2 py-2 border rounded-md "
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="w-6 h-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+                    fields={fields}
+                    updateLabelCB={updateLabelCB}
+                    removeFieldCB={removeFieldCB}
+                  />
                 );
               } else {
                 return (
-                  <Singleselectfields
+                  <MultiselectComp
                     key={fields.id}
-                    onChangeCB={(id, label) => {
-                      // dispatch({ type: "UPDATE_LABEL", id, label });
-                    }}
-                    removeFieldCB={(id) => {
-                      removeFieldCB(fields.id!);
-                    }}
                     fields={fields}
-                    updateOptionCB={(id, options) => {
-                      // dispatch({ type: "UPDATE_OPTIONS", id, options });
-                    }}
+                    addOptionCB={addOptionCB}
+                    editOptionCB={editOptionCB}
+                    deleteOptionCB={deleteOptionCB}
+                    updateLabelCB={updateLabelCB}
+                    removeFieldCB={removeFieldCB}
                   />
                 );
               }
@@ -377,22 +479,22 @@ function FormBuilder(props: { formId: string }) {
           Close Form
         </button>
       </div>
-      {/* {previewSection(state)} */}
+      {previewSection(state.form)}
     </div>
   );
 }
 
-const previewSection = (fields: FormData) => (
+const previewSection = (form: Form) => (
   <div className="flex items-center gap-2">
     <input
-      value={`http://localhost:3000/preview/${fields.id}`}
+      value={`http://localhost:3000/preview/${form.id!}`}
       className="border border-gray-200 bg-gray-50 rounded-lg p-2 mt-2 mb-4 flex-1"
       type={"text"}
       disabled
     />
     <Link
       type="button"
-      href={`/preview/${fields.id}`}
+      href={`/preview/${form.id}`}
       className="px-2 py-2 border flex mb-2 justify-center rounded-md bg-blue-500 text-white"
       target="_blank"
     >

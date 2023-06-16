@@ -103,3 +103,8 @@ export const updateLabel = async (formid: number, id: number, label: updatedForm
     const response = await request(`forms/${formid}/fields/${id}/`, "PATCH", { label });
     return response;
 }
+
+export const updateOption = async (formid: number, id: number, options: string[]) => {
+    const response = await request(`forms/${formid}/fields/${id}/`, "PATCH", {options});
+    return response;
+}

@@ -15,7 +15,7 @@ export type updatedFormFields = {
     id?: string;
     label: string;
     kind: updatedFieldKind;
-    options?: Option[];
+    options?: string[];
     type?: string;
 }
 
