@@ -1,10 +1,14 @@
 import React, { useEffect, useReducer, useRef, useState } from "react";
 
-import { Form, updatedFormFields, updatedFieldKind } from "../types/formTypes";
+import {
+  Form,
+  updatedFormFields,
+  updatedFieldKind,
+} from "../../types/formTypes";
 
 import { Link, navigate } from "raviger";
 
-import { updatedKind } from "../utils/FromUtils";
+import { updatedKind } from "../../utils/FromUtils";
 import {
   createField,
   deleteField,
@@ -14,201 +18,12 @@ import {
   updateLabel,
   updateOption,
   updateTitle,
-} from "../utils/apiUtils";
-import { Pagination } from "../types/common";
-import TextField from "./TextField";
-import MultiselectComp from "./MultiselectComp";
-
-type State = {
-  form: Form;
-  formFields: updatedFormFields[];
-};
-
-type InitializeState = {
-  type: "INITIALIZE_STATE";
-  data: State;
-};
-
-type UpdateTitleAction = {
-  type: "UPDATE_TITLE";
-  title: string;
-};
-
-type UpdateDescriptionAction = {
-  type: "UPDATE_DESC";
-  description: string;
-};
-
-type AddFieldAction = {
-  type: "ADD_FIELD";
-  id: number;
-  kind: updatedFieldKind;
-  label: string;
-};
-
-type DeleteFieldAction = {
-  type: "DELETE_FIELD";
-  formId: number;
-  fieldId: number;
-};
-
-type updateFieldAction = {
-  type: "UPDATE_FIELD";
-  id: string;
-  label: string;
-};
-
-type AddOptionAction = {
-  type: "ADD_OPTION";
-  id: string;
-  option: string;
-};
-
-type DeleteOptionAction = {
-  type: "DELETE_OPTION";
-  value: string;
-  id: string;
-};
-
-type EditOptionAction = {
-  type: "EDIT_OPTION";
-  id: string;
-  newValue: string;
-  oldValue: string;
-};
-
-type Action =
-  | AddFieldAction
-  | InitializeState
-  | UpdateTitleAction
-  | UpdateDescriptionAction
-  | DeleteFieldAction
-  | updateFieldAction
-  | AddOptionAction
-  | DeleteOptionAction
-  | EditOptionAction;
-
-const reducer = (state: State, action: Action) => {
-  switch (action.type) {
-    case "INITIALIZE_STATE": {
-      return action.data;
-    }
-    case "UPDATE_TITLE": {
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          title: action.title,
-        },
-      };
-    }
-    case "ADD_FIELD": {
-      const newField: updatedFormFields = {
-        id: String(action.id),
-        label: action.label,
-        kind: action.kind,
-        options: [],
-        type: action.kind,
-      };
-      return {
-        ...state,
-        formFields: [...state.formFields, newField],
-      };
-    }
-    case "DELETE_FIELD": {
-      return {
-        ...state,
-        formFields: state.formFields.filter((formFields: updatedFormFields) => {
-          return Number(formFields.id!) !== action.fieldId;
-        }),
-      };
-    }
-    case "UPDATE_DESC": {
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          description: action.description,
-        },
-      };
-    }
-    case "UPDATE_FIELD": {
-      return {
-        ...state,
-        formFields: state.formFields.map((formFields: updatedFormFields) => {
-          if (formFields.id === action.id) {
-            return {
-              ...formFields,
-              label: action.label,
-            };
-          }
-          return formFields;
-        }),
-      };
-    }
-    case "ADD_OPTION": {
-      return {
-        ...state,
-        formFields: state.formFields.map((formFields: updatedFormFields) => {
-          if (Number(formFields.id!) === Number(action.id)) {
-            if (
-              formFields.options === undefined ||
-              formFields.options === null
-            ) {
-              return {
-                ...formFields,
-                options: [action.option],
-              };
-            } else {
-              return {
-                ...formFields,
-                options: [...formFields.options, action.option],
-              };
-            }
-          } else {
-            return formFields;
-          }
-        }),
-      };
-    }
-    case "DELETE_OPTION": {
-      return {
-        ...state,
-        formFields: state.formFields.map((formFields: updatedFormFields) => {
-          if (Number(formFields.id) === Number(action.id)) {
-            return {
-              ...formFields,
-              options: formFields.options?.filter(
-                (opt) => opt !== action.value
-              ),
-            };
-          }
-          return formFields;
-        }),
-      };
-    }
-    case "EDIT_OPTION": {
-      return {
-        ...state,
-        formFields: state.formFields.map((formFields: updatedFormFields) => {
-          if (Number(formFields.id) === Number(action.id)) {
-            return {
-              ...formFields,
-              options: formFields.options?.map((opt) => {
-                if (opt === action.oldValue) {
-                  return action.newValue;
-                }
-                return opt;
-              }),
-            };
-          }
-          return formFields;
-        }),
-      };
-    }
-  }
-  return state;
-};
+} from "../../utils/apiUtils";
+import { Pagination } from "../../types/common";
+import TextField from "../TextField";
+import MultiselectComp from "../MultiselectComp";
+import { reducer, State } from "./reducer";
+import Button from "../../common/Button";
 
 function FormBuilder(props: { formId: string }) {
   const initializerState: State = {
@@ -219,13 +34,13 @@ function FormBuilder(props: { formId: string }) {
     formFields: [] as updatedFormFields[],
   };
 
-  const [state, dispatch] = useReducer(reducer, initializerState);
-
   useEffect(() => {
     updatedInitialState(props.formId).then((data) => {
       dispatch({ type: "INITIALIZE_STATE", data });
     });
   }, [props.formId]);
+
+  const [state, dispatch] = useReducer(reducer, initializerState);
 
   const updatedInitialState = async (id: string) => {
     const form = await loadForm(Number(id));
@@ -244,11 +59,11 @@ function FormBuilder(props: { formId: string }) {
   const titleRef = useRef<HTMLInputElement>(null);
 
   const createFieldCB = async (
-    id: number,
+    formId: Form["id"],
     label: updatedFormFields["label"],
     kind: updatedFormFields["kind"]
   ) => {
-    const field = await createField(state.form.id!, { label, kind });
+    const field = await createField(formId!, { label, kind });
     dispatch({ type: "ADD_FIELD", id: field.id, kind, label });
   };
 
@@ -435,29 +250,13 @@ function FormBuilder(props: { formId: string }) {
                 );
               })}
             </select>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
+            <Button
+              name="add"
+              onClick={() => {
                 createFieldCB(state.form.id!, newField, kind);
                 setNewField("");
               }}
-              className="px-2 py-2 border flex justify-center rounded-md flex-1 bg-blue-500 text-white"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
-                />
-              </svg>
-            </button>
+            />
           </div>
         </div>
       </div>

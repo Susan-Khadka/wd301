@@ -26,29 +26,6 @@ function Home() {
     fetchForms(setFormData);
   }, []);
 
-  // Add a new form
-  // const addForms = () => {
-  //   const localForms = getLocalForms();
-  //   const newForm = {
-  //     id: uuidv4(),
-  //     title: "Untitled Form",
-  //     formFields: initialFormFields,
-  //   };
-
-  //   setFormData([...localForms, newForm]);
-  //   saveLocalForms([...localForms, newForm]);
-  //   navigate(`/form/${newForm.id}`);
-  // };
-
-  // // Delete a form
-  // const deleteForm = (id: string) => {
-  //   const updatedLocalForms = formData.filter(
-  //     (form: FormData) => form.id !== id
-  //   );
-  //   setFormData(updatedLocalForms);
-  //   saveLocalForms(updatedLocalForms);
-  // };
-
   const deleteFormCB = async (id: string) => {
     // Delete form from the state
     const updatedLocalForms = formData.filter(
