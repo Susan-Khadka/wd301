@@ -7,7 +7,7 @@ import Login from "../components/Login";
 import Registration from "../components/Registration";
 import { User } from "../types/userTypes";
 // import FormBuilder from "../components/FormBuilder";
-import UpdatedPreview from "../components/UpdatedPreview";
+import UpdatedPreview from "../components/preview/UpdatedPreview";
 import { Suspense, lazy } from "react";
 import Loading from "../common/Loading";
 
