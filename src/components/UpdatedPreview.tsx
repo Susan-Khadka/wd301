@@ -9,6 +9,7 @@ type State = {
   formFields: updatedFormFields[];
   currentField: updatedFormFields;
   currentPosition: number;
+  submissionStatus: boolean;
 };
 
 type InitializeState = {
@@ -30,11 +31,17 @@ type TextChangeHandler = {
   value: string;
 };
 
+type SubmissionHandler = {
+  type: "SUBMISSION_HANDLER";
+  // id: number;
+};
+
 type Action =
   | InitializeState
   | NextHandler
   | PreviousHandler
-  | TextChangeHandler;
+  | TextChangeHandler
+  | SubmissionHandler;
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -73,6 +80,12 @@ const reducer = (state: State, action: Action) => {
         },
       };
     }
+    case "SUBMISSION_HANDLER": {
+      return {
+        ...state,
+        submissionStatus: true,
+      };
+    }
   }
   return state;
 };
@@ -83,6 +96,7 @@ function UpdatedPreview(props: { formId: string }) {
     formFields: [] as updatedFormFields[],
     currentField: {} as updatedFormFields,
     currentPosition: 0,
+    submissionStatus: false,
   };
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -104,6 +118,7 @@ function UpdatedPreview(props: { formId: string }) {
       formFields: formFields.results,
       currentField: formFields.results[0],
       currentPosition: 0,
+      submissionStatus: false,
     };
   };
 
@@ -126,9 +141,14 @@ function UpdatedPreview(props: { formId: string }) {
       });
   };
 
+  const submissionHandlerCB = () => {
+    dispatch({ type: "SUBMISSION_HANDLER" });
+  };
+
   return (
     <div className="divide-y divide-dotted">
       <p className="text-2xl text-center my-4">{state.form.title}</p>
+      <p className="text-lg text-start py-4">{state.form.description}</p>
       <div>
         {state.currentField.kind === "TEXT" && (
           <TextField
@@ -142,8 +162,15 @@ function UpdatedPreview(props: { formId: string }) {
             currentField={state.currentField}
           />
         )}
+        {state.currentField.kind === "RADIO" && (
+          <RadioField
+            currentField={state.currentField}
+            textChangeHandler={textChangeHandler}
+          />
+        )}
       </div>
       <FooterButtons
+        submissionHandlerCB={submissionHandlerCB}
         nextHandlerCB={nextHandlerCB}
         previousHandlerCB={previousHandlerCB}
         currentPosition={state.currentPosition}
@@ -158,7 +185,7 @@ function TextField(props: {
   textChangeHandler: (id: number, value: string) => void;
 }) {
   return (
-    <div className="pt-3">
+    <div className="text-lg my-4">
       <label className="block text-xl" htmlFor={props.field.label}>
         {props.field.label}
       </label>
@@ -167,7 +194,7 @@ function TextField(props: {
           props.textChangeHandler(Number(props.field.id!), e.target.value);
         }}
         name={props.field.label}
-        className="border w-full border-gray-200 rounded-lg p-2 mt-2 mb-4 flex-1"
+        className="border w-full border-gray-200 rounded-lg p-2 mt-2 flex-1"
         type={props.field.type}
         value={!props.field.value ? "" : props.field.value}
       />
@@ -197,7 +224,10 @@ function MultiDropDown(props: {
     );
   };
   return (
-    <div className="text-lg mb-5">
+    <div className="text-lg my-4">
+      <label className="block text-xl mb-2" htmlFor={props.currentField.label}>
+        {props.currentField.label}
+      </label>
       <Multiselect
         options={options}
         displayValue="value"
@@ -215,6 +245,7 @@ function FooterButtons(props: {
   previousHandlerCB: () => void;
   currentPosition: number;
   formFields: updatedFormFields[];
+  submissionHandlerCB: () => void;
 }) {
   return (
     <div className="flex justify-between pt-2">
@@ -244,4 +275,43 @@ function FooterButtons(props: {
     </div>
   );
 }
+
+function RadioField(props: {
+  currentField: updatedFormFields;
+  textChangeHandler: (id: number, value: string) => void;
+}) {
+  return (
+    <div className="mb-5">
+      <label className="block text-xl mb-2" htmlFor={props.currentField.label}>
+        {props.currentField.label}
+      </label>
+      {props.currentField.options?.map((option, index) => {
+        return (
+          <div
+            className="flex gap-x-2"
+            key={`${props.currentField.kind}-${index}`}
+          >
+            <input
+              onChange={(e) => {
+                props.textChangeHandler(
+                  Number(props.currentField.id!),
+                  e.target.value
+                );
+              }}
+              type={props.currentField.kind.toLowerCase()}
+              id={`${props.currentField.label}-${index}`}
+              name={props.currentField.label}
+              value={option}
+              checked={props.currentField.value === option}
+            />
+            <label htmlFor={`${props.currentField.label}-${index}`}>
+              {option}
+            </label>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default UpdatedPreview;
