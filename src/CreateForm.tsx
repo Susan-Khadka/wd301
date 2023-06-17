@@ -11,7 +11,7 @@ export default function CreateForm() {
     is_public: true,
   });
 
-  const [errors, setErrors] = useState<Errors<Form>>({});
+  // const [errors, setErrors] = useState<Errors<Form>>({});
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,7 +37,7 @@ export default function CreateForm() {
         <div className="mb-4 w-full">
           <label
             htmlFor="title"
-            className={`${errors.title ? "text-red-500" : ""} text-xl`}
+            className={` text-xl`}
           >
             Title
           </label>
@@ -51,11 +51,11 @@ export default function CreateForm() {
               setForm({ ...form, title: e.target.value });
             }}
           />
-          {errors.title && <p className="text-red-500">{errors.title}</p>}
+          {/* {errors.title && <p className="text-red-500">{errors.title}</p>} */}
         </div>
         <div className="mb-4">
           <label
-            className={`${errors.description ? "text-red-500" : ""} text-xl`}
+            className={` text-xl`}
             htmlFor="description"
           >
             Description
@@ -70,9 +70,9 @@ export default function CreateForm() {
               setForm({ ...form, description: e.target.value });
             }}
           />
-          {errors.description && (
+          {/* {errors.description && (
             <p className="text-red-500">{errors.description}</p>
-          )}
+          )} */}
         </div>
         <div className="flex gap-2 mb-4">
           <input
@@ -85,9 +85,9 @@ export default function CreateForm() {
           <label className="text-xl" htmlFor="is_public">
             Public
           </label>
-          {errors.is_public && (
+          {/* {errors.is_public && (
             <p className="text-red-500">{errors.is_public}</p>
-          )}
+          )} */}
         </div>
         <div className=" flex my-2">
           <button

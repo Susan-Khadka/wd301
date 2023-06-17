@@ -2,7 +2,7 @@ import React, { FormEvent, useState } from "react";
 import { register } from "../utils/apiUtils";
 import { Link, navigate } from "raviger";
 
-type Registration = {
+type RegistrationData = {
   username: string;
   email: string;
   password1: string;
@@ -10,7 +10,7 @@ type Registration = {
 };
 
 function Registration() {
-  const [registrationData, setRegistrationData] = useState<Registration>({
+  const [registrationData, setRegistrationData] = useState<RegistrationData>({
     username: "",
     email: "",
     password1: "",
